@@ -1,6 +1,6 @@
-const { AppError } = require('./error');
+import { AppError } from "./error.middleware.js";
 
-function roleGuard(allowed = []) {
+export function roleGuard(allowed = []) {
   return (req, _res, next) => {
     const role = req.user?.role;
     if (!role || !allowed.includes(role)) {
@@ -10,4 +10,3 @@ function roleGuard(allowed = []) {
   };
 }
 
-module.exports = { roleGuard };
