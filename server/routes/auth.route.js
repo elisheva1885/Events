@@ -19,10 +19,5 @@ router.post('/supplier/login', supplierLogin);
 // 🔹 כניסה עם ספק חיצוני (Google)
 router.post('/google', googleLogin);
 
-// 🔹 שליפת פרופיל משתמש מחובר
-router.get('/me', authenticate, getProfile);
-
-// 🔹 עדכון פרופיל
-router.patch('/me', authenticate, updateProfile);
 
 export default router;
