@@ -10,7 +10,8 @@ export async function register({ name, email, password }) {
     const hashedPassword = await bcrypt.hash(password, 10);
     userData = { name, email, password: hashedPassword, role: 'user' };
     const user = await createUser(userData);
-    return user;
+    const token = jwt.sign({ id: user._id, role: user.role }, SECRET, { expiresIn: '1d' });
+    return token;
 }
 
 export async function login({ email, password }) {
