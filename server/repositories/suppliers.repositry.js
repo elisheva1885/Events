@@ -1,6 +1,10 @@
-const Supplier = require('../models/Supplier');
+import Supplier from '../models/supplier.model.js';
 
-async function findMany({ category, region, active, q, page = 1, limit = 20 }) {
+export async function updateStatus(id, status) {
+  return await Supplier.findByIdAndUpdate(id, { status }, { new: true });
+}
+
+export async function findMany({ category, region, active, q, page = 1, limit = 20 }) {
   const filter = {};
   if (category) filter.category = category;
   if (region)   filter.regions  = region;
@@ -23,8 +27,6 @@ async function findMany({ category, region, active, q, page = 1, limit = 20 }) {
   return { items, total, page: Number(page), limit: Number(limit) };
 }
 
-function findById(id) {
+export function findById(id) {
   return Supplier.findById(id).populate('category', 'label').lean();
 }
-
-module.exports = { findMany, findById };

@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { createUser, loginUser } from '../repositories/auth.repository.js';
+// import { createUser, loginUser } from '../repositories/auth.repository.js';
+import * as repo from '../repositories/auth.repository.js';
 
 const SECRET = process.env.JWT_SECRET || 'secretkey';
 
@@ -9,7 +10,7 @@ export async function register({ name, email, password }) {
     if (existingUser) throw new Error('User already exists');
     const hashedPassword = await bcrypt.hash(password, 10);
     userData = { name, email, password: hashedPassword, role: 'user' };
-    const user = await createUser(userData);
+    const user = await repo.createUser(userData);
     const token = jwt.sign({ id: user._id, role: user.role }, SECRET, { expiresIn: '1d' });
     return token;
 }

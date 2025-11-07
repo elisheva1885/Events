@@ -1,7 +1,6 @@
 // src/middlewares/auth.middleware.js
 import jwt from 'jsonwebtoken';
-import { User } from '../models/user.model.js';
-
+import userModel from '../models/user.model.js';
 export async function authGuard(req, res, next) {
   try {
     // 🔹 שליפת ה-Token מה-Headers
@@ -16,7 +15,7 @@ export async function authGuard(req, res, next) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // 🔹 חיפוש המשתמש במסד הנתונים לפי ה-ID שב-Token
-    const user = await User.findById(decoded.id);
+    const user = await userModel.findById(decoded.id);
     if (!user) {
       return res.status(401).json({ message: 'User not found' });
     }
