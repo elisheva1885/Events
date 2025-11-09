@@ -2,6 +2,8 @@ import asyncHandler from '../middlewares/asyncHandler.middleware.js';
 import supplierRequestService from '../services/request.service.js';
 
 export const createRequest = asyncHandler(async (req, res) => {
+  console.log("gg");
+  
   const { eventId } = req.params;
   const { supplierId, notesFromClient } = req.body;
   const clientId = req.user._id; 

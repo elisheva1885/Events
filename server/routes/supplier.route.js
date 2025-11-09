@@ -8,6 +8,7 @@ import { roleGuard } from '../middlewares/role.middleware.js';
 const router = Router();
 
 const allowClientAdmin = [ 'user', 'admin' ];
+const allowAll = [ 'user', 'admin', 'supplier' ];
 
 // GET /api/suppliers?category=&region=&active=&q=&page=&limit=
 router.get(
@@ -29,7 +30,11 @@ router.get(
 router.post('/supplier/register', ctrl.supplierRegister);
 // // POST /api/supplier/login
 router.post('/supplier/login', ctrl.supplierLogin);
-//PATCH /api/suppliers/:id
-router.patch('/:id/status', ctrl.updateSupplierStatus);
+//PATCH /api/suppliers/:id/status
+router.patch('/:id',
+  authGuard,
+  roleGuard(['admin']),
+  validateObjectId('id'),
+  ctrl.updateSupplierStatus);
 
 export default router;
