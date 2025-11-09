@@ -4,6 +4,8 @@ import * as ctrl from '../controllers/supplier.controller.js';
 import { authGuard } from '../middlewares/auth.middleware.js';
 import { Router } from 'express';
 import { roleGuard } from '../middlewares/role.middleware.js';
+import { validateBody } from '../middlewares/validate.middleware.js';
+import { supplierRegisterSchema } from '../validation/supplier.validation.js';
 
 const router = Router();
 
@@ -26,7 +28,7 @@ router.get(
   ctrl.getOne
 );
 // POST /api/supplier/register
-router.post('/supplier/register', ctrl.supplierRegister);
+router.post('/supplier/register', validateBody(supplierRegisterSchema),ctrl.supplierRegister);
 //PATCH /api/suppliers/:id
 router.patch('/:id/status', ctrl.updateSupplierStatus);
 
