@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import userModel from '../models/user.model.js';
 export async function authGuard(req, res, next) {
   try {
+    
     // 🔹 שליפת ה-Token מה-Headers
     const authHeader = req.header('Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {

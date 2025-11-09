@@ -14,4 +14,5 @@ const paymentSchema = new Schema(
 );
 
 paymentSchema.index({ contractId: 1, status: 1 });
+
 export default model('Payment', paymentSchema);

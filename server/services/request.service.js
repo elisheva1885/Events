@@ -1,8 +1,8 @@
-import SupplierRequest from '../models/SupplierRequest.js';
-import { AppError } from '../middleware/errorHandler.js';
-import Event from '../models/Event.js';
-import Supplier from '../models/Supplier.js';
-import User from '../models/User.js';
+import SupplierRequest from '../models/request.model.js';
+import Event from '../models/event.model.js';
+import Supplier from '../models/supplier.model.js';
+import User from '../models/user.model.js';
+import { AppError } from '../middlewares/error.middleware.js';
 
 const createSupplierRequest = async ({ eventId, supplierId, clientId, notesFromClient }) => {
   const [event, supplier, client] = await Promise.all([
