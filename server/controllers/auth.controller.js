@@ -1,17 +1,16 @@
 // src/controllers/auth.controller.js
-import { registerUser, login } from '../services/auth.service.js';
-import asyncHandler from '../middlewares/asyncHandler';
+import * as serv from '../services/auth.service.js';
+import asyncHandler from '../middlewares/asyncHandler.middleware.js';
 
-
-const register = asyncHandler(async(req, res)=> {
-    const user = await registerUser(req.body);
-    res.status(201).json({ message: 'User registered', user });  
+export const register = asyncHandler(async (req, res) => {
+  console.log("userController ", req.body);
+  const token = await serv.register(req.body);
+  res.status(201).json({ message: 'User registered', token });
 });
 
-const login = asyncHandler(async(req, res) =>{
-    const { email, password } = req.body;
-    const { user, token } = await login(email, password);
-    res.json({ user, token });
+export const login = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+console.log("credentials controller: ", email, password);
+  const { token } = await serv.login(email, password);
+  res.json({ token });
 });
-
-module.exports = { register, login };
