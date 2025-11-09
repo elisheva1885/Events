@@ -206,3 +206,20 @@ USERS:
 //   "phone": "+972521234567",
 //   "password": "SecurePass456"
 // }
+
+SUPPLIERS:
+// {
+//   "name": "Noa Shapiro",
+//   "email": "noa.shapiro@example.com",
+//   "phone": "0539876543",
+//   "password": "ValidPass123",
+//   "category": "64f0b987654321abcdef5679",
+//   "regions": ["צפון", "חיפה"],
+//   "kashrut": "כשר למהדרין",
+//   "portfolio": [
+//     { "url": "https://example.com/noa_portfolio1.jpg", "title": "Portfolio A" },
+//     { "url": "https://example.com/noa_portfolio2.jpg", "title": "Portfolio B" }
+//   ],
+//   "profileImage": { "url": "https://example.com/noa_profile.jpg", "alt": "Profile Image" },
+//   "description": "ספק נוסף לדוגמה עם פרטי משתמש וספק"
+// }
