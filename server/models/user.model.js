@@ -19,6 +19,7 @@ const userSchema = new Schema(
       required: true,
       index: true
     },
+    password: { type: String, required: true },
     social: {
       googleId: { type: String, index: true, sparse: true }
     }
