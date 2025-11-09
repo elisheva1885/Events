@@ -1,37 +1,22 @@
 // auth.repository.js
-
+import User from '../models/user.model.js';
 // 🔹 יצירת משתמש חדש
-async function createUser({ name, email, password, role }) {
+export async function createUser(userData) {
+     const user = new User(userData);
+  return await user.save();
     // TODO: לממש יצירת משתמש במסד הנתונים
 }
 
 // 🔹 התחברות – אימות סיסמה
-async function loginUser({ email, password }) {
+export async function findUserByEmail(email) {
     // TODO: לממש התחברות ובדיקת סיסמה
+  return await User.findOne({ email });
 }
 
-// 🔹 שליפת פרופיל משתמש לפי ID
-async function getUserById(id) {
-    // TODO: לממש שליפת פרופיל משתמש
-}
-
-// 🔹 עדכון פרופיל משתמש
-async function updateUser(id, updateData) {
-    // TODO: לממש עדכון פרופיל משתמש
-}
 
 // 🔹 כניסה עם ספק חיצוני (Google)
-async function loginOrCreateGoogleUser({ email, name }) {
+export async function loginOrCreateGoogleUser({ email, name }) {
     // TODO: לממש כניסה או יצירת משתמש דרך Google
 }
 
 // 🔹 יצירת JWT
-
-
-module.exports = {
-    createUser,
-    loginUser,
-    getUserById,
-    updateUser,
-    loginOrCreateGoogleUser,
-};

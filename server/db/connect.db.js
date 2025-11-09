@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
-const { mongoUri, mongoDbName, mongoOptions } = require('./config.db');
+import mongoose from 'mongoose';
+import { mongoUri, mongoDbName, mongoOptions } from './config.db.js';
 let isConnected = false;
 
-async function connectMongo() {
+export async function connectMongo() {
   if (isConnected) return mongoose.connection;
   mongoose.connection.on('connected', () => console.log('[Mongo] connected'));
   mongoose.connection.on('error', (e) => console.error('[Mongo] error', e));
@@ -14,9 +14,8 @@ async function connectMongo() {
   return mongoose.connection;
 }
 
-async function disconnectMongo() {
+export async function disconnectMongo() {
   await mongoose.disconnect();
   isConnected = false;
 }
 
-module.exports = { connectMongo, disconnectMongo };

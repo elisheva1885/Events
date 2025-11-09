@@ -1,7 +1,6 @@
-const { AppError } = require('../middlewares/error');
-const repo = require('../repositories/supplier.repo');
-
-async function listSuppliers(query) {
+import { AppError } from '../middlewares/error.middleware.js';
+import * as repo from '../repositories/suppliers.repositry.js';
+export async function listSuppliers(query) {
   const { items, total, page, limit } = await repo.findMany(query);
   return {
     suppliers: items,
@@ -14,10 +13,20 @@ async function listSuppliers(query) {
   };
 }
 
-async function getSupplier(id) {
+export async function getSupplier(id) {
   const supplier = await repo.findById(id);
   if (!supplier) throw new AppError(404, 'Supplier not found');
   return supplier;
 }
 
-module.exports = { listSuppliers, getSupplier };
+export async function updateSupplierStatus(id, status) {
+  const validStatuses = ['בהמתנה', 'מאושר', 'נפסל', 'נחסם'];
+  if (!validStatuses.includes(status)) {
+    throw new AppError(400, 'סטטוס לא תקין');
+  }
+
+  const supplier = await repo.updateStatus(id, status);
+  if (!supplier) throw new AppError(404, 'ספק לא נמצא');
+
+  return supplier;
+}

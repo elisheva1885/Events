@@ -1,23 +1,19 @@
 import { Router } from 'express';
-import { register, login, googleLogin, getProfile, updateProfile } from '../controllers/auth.controller';
-import { authenticate } from '../middlewares/auth.middleware';
+// import { register, login, googleLogin, getProfile, updateProfile } from '../controllers/auth.controller';
+import * as cont from '../controllers/auth.controller.js';
 
 const router = Router();
 
-// 🔹 רישום משתמש חדש
-router.post('/register', register);
+// router.post('/register', validateBody(registerSchema), register);
+// router.post('/login', validateBody(loginSchema), login);
 
-// 🔹 התחברות רגילה
-router.post('/login', login);
+router.post('/register', cont.register);
+router.post('/login',cont.login);
+
 
 
 // 🔹 כניסה עם ספק חיצוני (Google)
-router.post('/google', googleLogin);
+// router.post('/google', googleLogin);
 
-// 🔹 שליפת פרופיל משתמש מחובר
-router.get('/me', authenticate, getProfile);
-
-// 🔹 עדכון פרופיל
-router.patch('/me', authenticate, updateProfile);
 
 export default router;

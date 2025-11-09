@@ -1,4 +1,5 @@
-const { Schema, model, Types } = require('mongoose');
+import mongoose from 'mongoose';
+const { Schema, model, Types } = mongoose;
 
 const portfolioSub = new Schema(
   {
@@ -25,11 +26,17 @@ const supplierSchema = new Schema(
     portfolio: { type: [portfolioSub], default: [] },
     profileImage: { type: profileImageSub, default: null },
     description: { type: String, trim: true },
-    isActive: { type: Boolean, default: true, index: true }
+    isActive: { type: Boolean, default: true, index: true },
+    status: {
+      type: String,
+      enum: ['חדש', 'בהמתנה', 'מאושר', 'נפסל', 'נחסם'],
+      default: 'חדש',
+      index: true
+    }
   },
   { timestamps: true }
 );
 
 supplierSchema.index({ category: 1, regions: 1, isActive: 1 });
 
-module.exports = model('Supplier', supplierSchema);
+export default model('Supplier', supplierSchema);

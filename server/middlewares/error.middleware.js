@@ -1,5 +1,5 @@
 // AppError - שגיאה עסקית מובנית; errorHandler - מטפל שגיאות גלובלי
-class AppError extends Error {
+export class AppError extends Error {
   constructor(statusCode, message, details) {
     super(message);
     this.statusCode = statusCode || 500;
@@ -7,8 +7,9 @@ class AppError extends Error {
   }
 }
 
-function errorHandler(err, req, res, _next) {
+export function errorHandler(err, req, res, _next) {
   console.error('❌ Error:', err);
+
 
   // אם זו שגיאה עסקית שלנו
   if (err instanceof AppError) {
@@ -32,5 +33,3 @@ function errorHandler(err, req, res, _next) {
     details: process.env.NODE_ENV === 'development' ? err.message : undefined
   });
 }
-
-module.exports = { AppError, errorHandler };

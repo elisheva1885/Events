@@ -1,16 +1,15 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const routes = require('./routes/index.router');
-const { connectMongo } = require('./db/connect.db');
-const mongoHealth = require('./db/health.db');
-const { errorHandler } = require('./middlewares/error');
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import router from './routes/index.router.js';
+import { connectMongo } from './db/connect.db.js';
+import { mongoHealth } from './db/health.db.js';
+import { errorHandler } from './middlewares/error.middleware.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
 
 app.use(helmet());
 
@@ -33,7 +32,7 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-app.use(routes)
+app.use(router)
 app.get('/health/mongo', mongoHealth);
 app.use(errorHandler);
 connectMongo().then(() => {

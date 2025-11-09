@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
-const { AppError } = require('./error');
+import mongoose from 'mongoose';
+import { AppError } from './error.middleware.js';
 
-module.exports = (paramName = 'id') => (req, _res, next) => {
+export default (paramName = 'id') => (req, _res, next) => {
   const id = req.params[paramName];
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new AppError(400, `Invalid ObjectId in param '${paramName}'`);

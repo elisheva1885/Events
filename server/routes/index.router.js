@@ -1,26 +1,29 @@
-const express = require('express');
-const router = express.Router();
+import { Router } from 'express';
 
-const authRouter    = require('./auth.route');   
-const supplierRouter     = require('./supplier.routes');      
-const eventRouter        = require('./event.routes');
-const requestRouter      = require('./request.routes');
-const contractRouter     = require('./contract.routes');
-const notificationRouter = require('./notification.routes');
+import authRouter from './auth.route.js';
+import supplierRouter from './supplier.route.js';
+import userRouter from './user.route.js'; // ⬅️ הוסף את זה!
+// import eventRouter from './event.routes.js';
+// import requestRouter from './request.routes.js';
+// import contractRouter from './contract.routes.js';
+// import notificationRouter from './notification.routes.js';
 
-app.get('/', (req, res) => res.send('🏠 This is the Home Page'));
+const router = Router();
+
+// 🔹 ראשי / home route
+router.get('/', (req, res) => res.send('🏠 This is the Home Page'));
+
+// 🔹 נתיבי משנה
 router.use('/auth', authRouter);
 router.use('/suppliers', supplierRouter);
-router.use('/events', eventRouter);
-router.use('/requests', requestRouter);
-router.use('/contracts', contractRouter);
-router.use('/notifications', notificationRouter);
+router.use('/users', userRouter); // ⬅️ שנה את זה!
+// router.use('/events', eventRouter);
+// router.use('/requests', requestRouter);
+// router.use('/contracts', contractRouter);
+// router.use('/notifications', notificationRouter);
 
+// 🔹 Health check
 router.get('/health', (req, res) => res.json({ up: true }));
 
-// ---- 404 לנתיבים שלא נתפסו בתוך /api ----
-router.use('*', (_req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
-
-module.exports = router;
+// ✅ ES Modules export
+export default router;
