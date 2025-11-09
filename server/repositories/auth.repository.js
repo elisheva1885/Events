@@ -8,7 +8,7 @@ export async function createUser(userData) {
 }
 
 // 🔹 התחברות – אימות סיסמה
-export async function loginUser(email) {
+export async function findUserByEmail(email) {
     // TODO: לממש התחברות ובדיקת סיסמה
   return await User.findOne({ email });
 }

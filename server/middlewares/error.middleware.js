@@ -10,6 +10,7 @@ export class AppError extends Error {
 export function errorHandler(err, req, res, _next) {
   console.error('❌ Error:', err);
 
+
   // אם זו שגיאה עסקית שלנו
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({ error: err.message, details: err.details });
