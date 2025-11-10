@@ -6,8 +6,6 @@ import { validateBody } from '../middlewares/validate.middleware.js';
 
 const router = Router();
 
-// router.post('/register', validateBody(registerSchema), register);
-// router.post('/login', validateBody(loginSchema), login);
 
 router.post('/register', validateBody(registerSchema),cont.register);
 router.post('/login',validateBody(loginSchema),cont.login);
