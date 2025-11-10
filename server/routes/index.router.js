@@ -7,7 +7,7 @@ import userRouter from './user.route.js'; // ⬅️ הוסף את זה!
 // import requestRouter from './request.routes.js';
 // import contractRouter from './contract.routes.js';
 // import notificationRouter from './notification.routes.js';
-
+import messageRouter from './message.route.js';
 const router = Router();
 
 // 🔹 ראשי / home route
@@ -21,6 +21,7 @@ router.use('/users', userRouter); // ⬅️ שנה את זה!
 // router.use('/requests', requestRouter);
 // router.use('/contracts', contractRouter);
 // router.use('/notifications', notificationRouter);
+router.use('/messages', messageRouter);
 
 // 🔹 Health check
 router.get('/health', (req, res) => res.json({ up: true }));
