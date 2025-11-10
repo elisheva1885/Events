@@ -1,17 +1,7 @@
-import './App.css'
 
-function App() {
+import "./styles/index.css";
+import { LandingPage } from "./pages/LandingPage";
 
-  return (
-    <>
-      <div>
-        {/* נסה משהו פשוט כמו: */}
-        <div className="bg-blue-500 text-white p-4 rounded-lg">
-          Hello Tailwind!
-        </div>
-      </div>
-    </>
-  )
+export default function App() {
+  return <LandingPage onNavigate={() => { }} />;
 }
-
-export default App
