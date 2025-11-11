@@ -10,6 +10,7 @@ import { supplierRegisterSchema } from '../validation/supplier.validation.js';
 const router = Router();
 
 const allowClientAdmin = [ 'user', 'admin' ];
+const allowAll = [ 'user', 'admin', 'supplier' ];
 
 // GET /api/suppliers?category=&region=&active=&q=&page=&limit=
 router.get(
@@ -28,8 +29,9 @@ router.get(
   ctrl.getOne
 );
 // POST /api/supplier/register
-router.post('/register', validateBody(supplierRegisterSchema),ctrl.supplierRegister);
+router.post('/supplier/register', ctrl.supplierRegister);
+// // POST /api/supplier/login
 //PATCH /api/suppliers/:id
-router.patch('/:id/status', ctrl.updateSupplierStatus);
+router.patch('/:id', ctrl.updateSupplierStatus);
 
 export default router;

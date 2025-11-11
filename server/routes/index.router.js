@@ -8,12 +8,14 @@ import userRouter from './user.route.js'; // ⬅️ הוסף את זה!
 import contractRouter from './contract.routes.js';
 // import notificationRouter from './notification.routes.js';
 
+import userRouter from './user.route.js'; 
+import eventRoutes from './event.route.js';
+import requestsRouter from './request.route.js';
+import notificationRoutes from './notification.routes.js';
 const router = Router();
 
-// 🔹 ראשי / home route
 router.get('/', (req, res) => res.send('🏠 This is the Home Page'));
 
-// 🔹 נתיבי משנה
 router.use('/auth', authRouter);
 router.use('/suppliers', supplierRouter);
 router.use('/users', userRouter); // ⬅️ שנה את זה!
@@ -21,9 +23,12 @@ router.use('/users', userRouter); // ⬅️ שנה את זה!
 // router.use('/requests', requestRouter);
 router.use('/contracts', contractRouter);
 // router.use('/notifications', notificationRouter);
+router.use('/users', userRouter);
+router.use('/events', eventRoutes);
+router.use('/requests', requestsRouter);
+router.use('/notifications', notificationRoutes);
 
-// 🔹 Health check
+
 router.get('/health', (req, res) => res.json({ up: true }));
 
-// ✅ ES Modules export
 export default router;

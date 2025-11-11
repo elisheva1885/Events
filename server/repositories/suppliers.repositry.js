@@ -1,7 +1,21 @@
-import Supplier from '../models/supplier.model.js';
+import models from '../models/index.model.js';
+
+const Supplier = models.Supplier;
 
 export async function updateStatus(id, status) {
-  return await Supplier.findByIdAndUpdate(id, { status }, { new: true });
+   const isActive = !(status === 'נפסל' || status === 'נחסם'|| status === 'בהמתנה');
+
+  const updatedSupplier = await Supplier.findByIdAndUpdate(
+    id,
+    { status, isActive },
+    { new: true } 
+  ).populate('category', 'label')
+
+  if (!updatedSupplier) {
+    throw new Error('Supplier not found'); 
+  }
+
+  return updatedSupplier;
 }
 
 export async function findMany({ category, region, active, q, page = 1, limit = 20 }) {
@@ -17,6 +31,7 @@ export async function findMany({ category, region, active, q, page = 1, limit = 
   const [items, total] = await Promise.all([
     Supplier.find(filter)
       .populate('category', 'label')
+      // .populate('user', 'email password name phone') 
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(Number(limit))
