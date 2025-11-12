@@ -12,7 +12,7 @@ const signatureSubSchema = Joi.object({
     }),
 
   at: Joi.date()
-    .default(() => new Date(), 'תאריך ברירת מחדל')
+    .default(() => new Date()) // פונקציה מחזירה תאריך נוכחי
     .messages({
       'date.base': 'תאריך החתימה לא תקין'
     }),

@@ -1,9 +1,10 @@
 import { Router } from 'express';
-import { createContract, getContract, signContract } from '../controllers/contract.controller';
-import { authenticate, authGuard } from '../middlewares/auth.middleware';
-import { validateBody } from '../middlewares/validate.middleware';
-import { createContractSchema } from '../validation/ontract.validtion';
-import { signContractSchema } from '../validation/contract.validtion';
+import * as cnt from '../controllers/contract.controller.js';
+import { authGuard } from '../middlewares/auth.middleware.js';
+import { connect } from 'mongoose';
+import { validateBody } from '../middlewares/validate.middleware.js';
+import { createContractSchema } from '../validation/contract.validtion.js';
+import { signContractSchema } from '../validation/contract.validtion.js';
 
 const router = Router();
 
@@ -11,7 +12,7 @@ const router = Router();
 router.post('/contracts', validateBody(createContractSchema),authGuard, createContract);
 
 // 🔹 שליפת חוזה קיים
-router.get('/contracts/:id', authGuard, getContract);
+router.get('/contracts/:id', authenticate, getContract);
 
 // 🔹 חתימה על חוזה
 router.post('/contracts/:id/sign',validateBody(signContractSchema), authGuard, signContract);
