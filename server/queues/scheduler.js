@@ -4,8 +4,11 @@ import Redis from 'ioredis';
 import { sendNotification } from '../websocket/notification.socket.js';
 
 const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
-  maxRetriesPerRequest: null,
-});
+
+  maxRetriesPerRequest: null, // ✅ חובה כדי למנוע את השגיאת BullMQ
+  tls: {               // 🔹 כאן צריך לשים את rejectUnauthorized
+    rejectUnauthorized: false
+  }});
 
 // תור לניהול התראות (גם מיידיות וגם עתידיות)
 export const notificationQueue = new Queue('notifications', { connection });
