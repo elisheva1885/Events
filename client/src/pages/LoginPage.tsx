@@ -21,7 +21,7 @@ export function LoginPage({ onLogin, onNavigate }: LoginPageProps) {
 
     try {
       await login({ email, password });
-      onLogin(); // מעבר ל-Dashboard
+      onLogin(); 
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'שגיאה בהתחברות. אנא נסה שוב.';
       setError(errorMessage);
