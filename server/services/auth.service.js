@@ -28,4 +28,49 @@ export async function login(email, password) {
 
     const token = jwt.sign({ id: user._id, role: user.role }, SECRET, { expiresIn: '1d' });
     return { token };
+<<<<<<< Updated upstream
+=======
+}
+
+export const googleLogin = async (profile) => {
+  let user = await repo.findUserByGoogleId(profile.id);
+
+  if (!user) {
+    user = await repo.createUserWithGoogle(profile);
+  }
+   const token = generateToken(user);
+  return { user, token };
+};
+
+// Google Auth - מקבל נתונים ישירות
+export async function googleAuth({ email, name, googleId, picture }) {
+  let user = await repo.findUserByGoogleId(googleId);
+  
+  if (!user) {
+    // בדיקה אם המשתמש קיים עם אותו אימייל
+    user = await repo.findUserByEmail(email);
+    
+    if (user) {
+      // אם המשתמש קיים, נוסיף לו את ה-googleId
+      user.social = { googleId };
+      await user.save();
+    } else {
+      // אם לא קיים, ניצור משתמש חדש
+      const tempPassword = Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcrypt.hash(tempPassword, 10);
+      
+      user = await repo.createUser({
+        name,
+        email,
+        phone: '',
+        password: hashedPassword,
+        role: 'user',
+        social: { googleId }
+      });
+    }
+  }
+  
+  const token = generateToken(user);
+  return { user, token };
+>>>>>>> Stashed changes
 }

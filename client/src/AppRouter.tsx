@@ -5,6 +5,10 @@ import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+<<<<<<< Updated upstream
+=======
+import FileUploader from "./components/FileUploader";
+>>>>>>> Stashed changes
 
 export default function AppRouter() {
   const navigate = useNavigate();
@@ -30,6 +34,10 @@ export default function AppRouter() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage onNavigate={handleNavigate} />} />
+<<<<<<< Updated upstream
+=======
+      {/* <Route path="/" element={ <FileUploader getPresignedUrlEndpoint="http://localhost:3000/api/contracts/upload-url" />} /> */}
+>>>>>>> Stashed changes
       <Route path="/login" element={<LoginPage onLogin={handleLogin} onNavigate={handleNavigate} />} />
       <Route path="/register" element={<RegisterPage onRegister={handleRegister} onNavigate={handleNavigate} />} />
       <Route

@@ -67,4 +67,9 @@
   * {
     direction: rtl;
   }
+
+  /* Gold gradient button */
+  .gradient-gold {
+    background: linear-gradient(135deg, #d4a960 0%, #c89645 100%);
+  }
 }

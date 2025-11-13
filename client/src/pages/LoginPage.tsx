@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Mail, Lock, ArrowLeft, Sparkles } from 'lucide-react';
 import { Button } from '../components/shared/Button';
 import { login } from '../api/auth';
+import { GoogleLoginButton } from '../components/shared/GoogleLoginButton';
 
 interface LoginPageProps {
   onLogin: () => void;
@@ -125,6 +126,23 @@ export function LoginPage({ onLogin, onNavigate }: LoginPageProps) {
               {loading ? 'מתחבר...' : 'התחבר'}
             </Button>
           </form>
+
+          {/* Divider */}
+          <div className="relative my-8">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-[#e3e3e6]"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white/80 text-[#6d6d78] font-light">או</span>
+            </div>
+          </div>
+
+          {/* Google Login Button */}
+          <GoogleLoginButton
+            onSuccess={onLogin}
+            onError={setError}
+            mode="login"
+          />
 
           <div className="mt-10 text-center">
             <p className="text-[#6d6d78] font-light">
