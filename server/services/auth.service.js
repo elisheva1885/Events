@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import * as repo from '../repositories/auth.repository.js';
 import { AppError } from '../middlewares/error.middleware.js';
 
-const SECRET = process.env.SECRET || 'secretkey';
+const JWT_SECRET = process.env.JWT_SECRET || 'secretkey';
 
 export async function register({ name, email, phone, password ,role}) {
     const existingUser = await repo.findUserByEmail(email);
@@ -13,7 +13,7 @@ export async function register({ name, email, phone, password ,role}) {
     const hashedPassword = await bcrypt.hash(password, 10);
     const userData = { name, email, phone, password: hashedPassword, role };
     const user = await repo.createUser(userData);
-    const token = jwt.sign({ id: user._id, role: user.role }, SECRET, { expiresIn: '1d' });
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
     return {user, token};
 }
 
@@ -26,6 +26,6 @@ export async function login(email, password) {
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) throw new AppError(401, 'אימייל או סיסמה שגויים');
 
-    const token = jwt.sign({ id: user._id, role: user.role }, SECRET, { expiresIn: '1d' });
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
     return { token };
 }
