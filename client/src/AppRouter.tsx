@@ -2,6 +2,7 @@
 import { Routes, Route } from "react-router-dom";
 import AppLayout from "./pages/AppLayout";
 import Dashboard from "./pages/Dashboard";
+import MyEvents from "./pages/MyEvents";
 
 export default function AppRouter() {
   return (
@@ -14,6 +15,13 @@ export default function AppRouter() {
           </AppLayout>
         }
       />
-    </Routes>
+      <Route path="/my-events"
+        element={
+          <AppLayout>
+            <MyEvents />
+          </AppLayout>
+        }
+      />
+    </Routes >
   );
 }
