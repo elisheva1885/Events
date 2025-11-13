@@ -22,24 +22,6 @@ export const login = asyncHandler(async (req, res) => {
     token
   });
 });
-<<<<<<< Updated upstream
-=======
-
-export const googleCallback = asyncHandler(async(req, res) => {
-    const profile = req.user; // Passport שם את הפרופיל
-    const { user, token } = await serv.googleLogin(profile);
-
-    res.json({
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      }
-    });
- 
-});
 
 // Google Auth - מקבל נתונים ישירות מהלקוח
 export const googleAuth = asyncHandler(async (req, res) => {
@@ -59,4 +41,3 @@ export const googleAuth = asyncHandler(async (req, res) => {
     }
   });
 });
->>>>>>> Stashed changes
