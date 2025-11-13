@@ -9,12 +9,12 @@ import { signContractSchema } from '../validation/contract.validtion.js';
 const router = Router();
 
 // 🔹 יצירת חוזה חדש
-router.post('/contracts', validateBody(createContractSchema),authGuard, createContract);
+router.post('/contracts', validateBody(createContractSchema),authGuard, cnt.createContract);
 
 // 🔹 שליפת חוזה קיים
-router.get('/contracts/:id', authenticate, getContract);
+router.get('/contracts/:id', authGuard, cnt.getContract);
 
 // 🔹 חתימה על חוזה
-router.post('/contracts/:id/sign',validateBody(signContractSchema), authGuard, signContract);
+router.post('/contracts/:id/sign',validateBody(signContractSchema), authGuard, cnt.signContract);
 
 export default router;

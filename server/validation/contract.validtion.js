@@ -75,7 +75,8 @@ export const createContractSchema = Joi.object({
     .items(signatureSubSchema)
     .default([])
     .messages({
-      'array.base': 'שדה signatures חייב להיות מערך תקין'
+      'array.base': 'שדה signatures חייב להיות מערך תקין',
+      'array.includes': 'אחד מהחתימות אינו תקין'
     }),
 
   status: Joi.string()
