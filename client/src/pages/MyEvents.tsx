@@ -1,78 +1,73 @@
-import { useState, useMemo } from "react";
-import { useUser, useEntityGetAll, useEntityCreate, useEntityUpdate, useEntityDelete, useExecuteAction } from "@blockscom/blocks-client-sdk/reactSdk";
-// import { Event, GetSupplierRecommendationsAction } from "../types/type";
-import { Event} from "../types/type";
+
+import { useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "../store";
+
+import {
+  fetchEvents,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+  fetchEventTypes,
+} from "../store/eventsSlice";
+
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import  Button  from "../components/ui/button";
-// import { Badge } from "../components/badge";
 import { Progress } from "../components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { Plus, Edit, Trash2, Eye } from "lucide-react";
-import { toast } from "sonner";
+import { Eye, Edit, Trash2, Plus } from "lucide-react";
+import { Button } from "../components/ui/button";
+
 import { formatEventDate, getEventStatusProgress } from "../utils/DataUtils";
+
 import { EventFormDialog } from "../components/EventFormDialog";
 import { EventDetailsDialog } from "../components/EventsDetailsDialog";
 
 export default function MyEvents() {
-  const user = useUser();
+  const dispatch = useDispatch<any>();
+
+  const { eventsList, loadingList, error } = useSelector(
+    (state: RootState) => state.events
+  );
+
   const [selectedTab, setSelectedTab] = useState("הכל");
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [editingEvent, setEditingEvent] = useState<any>(null);
   const [viewingEvent, setViewingEvent] = useState<any>(null);
+  const [editingEvent, setEditingEvent] = useState<any>(null);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
-  const { data: events, isLoading } = useEntityGetAll(Event, {
-    clientEmail: user.email,
-  });
+  // טוען אירועים בהעלאה
+  useEffect(() => {
+    dispatch(fetchEvents());
+    dispatch(fetchEventTypes());
+  }, [dispatch]);
 
-  const { createFunction, isLoading: isCreating } = useEntityCreate(Event);
-  const { updateFunction, isLoading: isUpdating } = useEntityUpdate(Event);
-  const { deleteFunction, isLoading: isDeleting } = useEntityDelete(Event);
 
+  // סינון לפי סטטוס
   const filteredEvents = useMemo(() => {
-    if (!events) return [];
-    if (selectedTab === "הכל") return events;
-    return events.filter((e) => e.status === selectedTab);
-  }, [events, selectedTab]);
+    if (!eventsList) return [];
+    if (selectedTab === "הכל") return eventsList;
+    return eventsList.filter((e) => e.status === selectedTab);
+  }, [eventsList, selectedTab]);
 
+  // יצירה
   const handleCreateEvent = async (data: any) => {
-    try {
-      await createFunction({
-        data: {
-          ...data,
-          clientEmail: user.email,
-          status: "תכנון",
-        },
-      });
-      toast.success("האירוע נוצר בהצלחה");
-      setIsCreateDialogOpen(false);
-    } catch (error) {
-      toast.error("שגיאה ביצירת האירוע");
-    }
+    await dispatch(createEvent(data));
+    setIsCreateDialogOpen(false);
   };
 
+  // עדכון
   const handleUpdateEvent = async (data: any) => {
-    if (!editingEvent) return;
-    try {
-      await updateFunction({
-        id: editingEvent.id,
-        data,
-      });
-      toast.success("האירוע עודכן בהצלחה");
-      setEditingEvent(null);
-    } catch (error) {
-      toast.error("שגיאה בעדכון האירוע");
-    }
+    await dispatch(updateEvent({ id: editingEvent._id, data }));
+    setEditingEvent(null);
   };
 
-  const handleDeleteEvent = async (eventId: string) => {
-    if (!confirm("האם אתה בטוח שברצונך למחוק את האירוע?")) return;
-    try {
-      await deleteFunction({ id: eventId });
-      toast.success("האירוע נמחק בהצלחה");
-    } catch (error) {
-      toast.error("שגיאה במחיקת האירוע");
-    }
+  // מחיקה
+  const handleDeleteEvent = async (id: string) => {
+    if (!confirm("למחוק את האירוע?")) return;
+    await dispatch(deleteEvent(id));
   };
+
+  if (loadingList) return <p>טוען אירועים...</p>;
+  if (error) return <p>שגיאה: {error}</p>;
 
   return (
     <div className="space-y-6" style={{ direction: "rtl" }}>
@@ -97,50 +92,40 @@ export default function MyEvents() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredEvents.map((event) => {
                 const progress = getEventStatusProgress(event.status);
+
                 return (
-                  <Card key={event.id} className="hover:shadow-lg transition-shadow">
+                  <Card
+                    key={event._id}
+                    className="hover:shadow-lg transition-shadow"
+                  >
                     <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <CardTitle className="text-lg">{event.eventName}</CardTitle>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {event.eventType}
-                          </p>
-                        </div>
-                        {/* <Badge
-                          variant={
-                            event.status === "הושלם"
-                              ? "secondary"
-                              : event.status === "פעיל"
-                              ? "default"
-                              : "outline"
-                          }
-                        >
-                          {event.status}
-                        </Badge> */}
-                      </div>
+                      <CardTitle>{event.name}</CardTitle>
+                      <p className="text-sm text-muted-foreground">
+                        {event.type}
+                      </p>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2 text-sm">
+
+                    <CardContent className="space-y-4 text-sm">
+                      <div className="space-y-1">
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">תאריך:</span>
-                          <span>{formatEventDate(event.eventDate)}</span>
+                          <span>תאריך:</span>
+                          <span>{formatEventDate(event.date)}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">מיקום:</span>
-                          <span>{event.location}</span>
+                          <span>מיקום:</span>
+                          <span>{event.locationRegion}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">אורחים:</span>
-                          <span>{event.guestCount}</span>
+                          <span>אורחים:</span>
+                          <span>{event.estimatedGuests}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">תקציב:</span>
+                          <span>תקציב:</span>
                           <span>₪{event.budget?.toLocaleString()}</span>
                         </div>
                       </div>
 
-                      <div className="space-y-1">
+                      <div>
                         <div className="flex justify-between text-xs text-muted-foreground">
                           <span>התקדמות</span>
                           <span>{progress}%</span>
@@ -156,8 +141,9 @@ export default function MyEvents() {
                           onClick={() => setViewingEvent(event)}
                         >
                           <Eye className="ml-2 h-4 w-4" />
-                          צפה בפרטים
+                          צפה
                         </Button>
+
                         <Button
                           variant="outline"
                           size="sm"
@@ -165,11 +151,11 @@ export default function MyEvents() {
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
+
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleDeleteEvent(event.id)}
-                          disabled={isDeleting}
+                          onClick={() => handleDeleteEvent(event._id)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -193,23 +179,24 @@ export default function MyEvents() {
         </TabsContent>
       </Tabs>
 
+      {/* יצירת אירוע */}
       <EventFormDialog
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
         onSubmit={handleCreateEvent}
-        isLoading={isCreating}
       />
 
+      {/* עריכת אירוע */}
       {editingEvent && (
         <EventFormDialog
           open={!!editingEvent}
+          initialData={editingEvent}
           onOpenChange={(open) => !open && setEditingEvent(null)}
           onSubmit={handleUpdateEvent}
-          isLoading={isUpdating}
-          initialData={editingEvent}
         />
       )}
 
+      {/* פירוט אירוע */}
       {viewingEvent && (
         <EventDetailsDialog
           event={viewingEvent}

@@ -13,10 +13,35 @@ export async function findUserByEmail(email) {
   return await User.findOne({ email });
 }
 
-
-// 🔹 כניסה עם ספק חיצוני (Google)
-export async function loginOrCreateGoogleUser({ email, name }) {
-    // TODO: לממש כניסה או יצירת משתמש דרך Google
+// 🔹 מציאת משתמש לפי Google ID
+export async function findUserByGoogleId(googleId) {
+    return await User.findOne({ 'social.googleId': googleId });
 }
 
-// 🔹 יצירת JWT
+// 🔹 עדכון Google ID למשתמש קיים
+export async function updateUserGoogleId(userId, googleId) {
+    return await User.findByIdAndUpdate(
+        userId,
+        { 'social.googleId': googleId },
+        { new: true }
+    );
+}
+
+export const findUserByGoogleId = async (googleId) => {
+  return User.findOne({ 'social.googleId': googleId });
+};
+
+export const createUserWithGoogle = async (profile) => {
+  const tempPassword = Math.random().toString(36).slice(-8);
+  const hashed = await bcrypt.hash(tempPassword, 10);
+
+  const user = await User.create({
+    name: profile.displayName || '',
+    email: profile.emails[0].value,
+    password: hashed,
+    role: 'user',
+    social: { googleId: profile.id }
+  });
+
+  return user;
+};

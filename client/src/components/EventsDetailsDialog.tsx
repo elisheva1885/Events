@@ -1,23 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
-import  Button  from "./ui/button";
+import {Button} from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { useExecuteAction, useEntityGetAll } from "@blockscom/blocks-client-sdk/reactSdk";
-import {
-  GetSupplierRecommendationsAction,
-  SupplierRequestsEntity,
-  ContractsEntity,
-  PaymentsEntity,
-} from "../Utils/DataUtils";
-import { Sparkles, Loader2 } from "lucide-react";
-import { toast } from "sonner";
 import { Badge } from "./ui/badge";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchEvents,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+} from "../store/eventsSlice";
+import type { RootState } from "../store";
 import { formatEventDate } from "../Utils/DataUtils";
+import { Loader2, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 
 interface EventDetailsDialogProps {
   event: any;
@@ -30,24 +31,12 @@ export const EventDetailsDialog = ({
   open,
   onOpenChange,
 }: EventDetailsDialogProps) => {
+  const dispatch = useDispatch();
   const [showRecommendations, setShowRecommendations] = useState(false);
+  const [recommendations, setRecommendations] = useState<any[]>([]);
+  const events = useSelector((state: RootState) => state.events.eventsList);
 
-  const { executeFunction, result, isLoading } = useExecuteAction(
-    GetSupplierRecommendationsAction
-  );
-
-  const { data: requests } = useEntityGetAll(SupplierRequestsEntity, {
-    eventId: event.id,
-  });
-
-  const { data: contracts } = useEntityGetAll(ContractsEntity, {
-    eventId: event.id,
-  });
-
-  const { data: payments } = useEntityGetAll(PaymentsEntity, {
-    eventId: event.id,
-  });
-
+  // כאן אפשר לדמות "המלצות" – למשל לקרוא API דרך slice אם קיים
   const handleGetRecommendations = async () => {
     if (!event.eventType || !event.location || !event.budget || !event.guestCount) {
       toast.error("נא למלא את כל פרטי האירוע לקבלת המלצות");
@@ -55,13 +44,24 @@ export const EventDetailsDialog = ({
     }
 
     try {
-      await executeFunction({
-        eventType: event.eventType,
-        location: event.location,
-        budget: event.budget,
-        guestCount: event.guestCount,
-        eventDate: event.eventDate,
-      });
+      // כאן אפשר לבצע קריאה ל-API דרך thunk (אם יצרת thunk כזה)
+      // לדוגמה: dispatch(fetchRecommendations(event))
+      // לעכשיו נשתמש בדמה
+      const simulatedResult = [
+        {
+          supplierName: "ספק לדוגמה 1",
+          category: "קייטרינג",
+          matchScore: 95,
+          reasoning: "מתאים לתקציב ולאירוע",
+        },
+        {
+          supplierName: "ספק לדוגמה 2",
+          category: "צילום",
+          matchScore: 88,
+          reasoning: "מומלץ לאירועים בגודל כזה",
+        },
+      ];
+      setRecommendations(simulatedResult);
       setShowRecommendations(true);
       toast.success("המלצות נוצרו בהצלחה");
     } catch (error) {
@@ -69,9 +69,17 @@ export const EventDetailsDialog = ({
     }
   };
 
+  // דוגמה להצגת requests/contracts/payments – אפשר לשמור ב-slice אם רוצים
+  const requests = []; // או state מסוים ב-slice
+  const contracts = [];
+  const payments = [];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto" style={{ direction: "rtl" }}>
+      <DialogContent
+        className="max-w-3xl max-h-[80vh] overflow-y-auto"
+        style={{ direction: "rtl" }}
+      >
         <DialogHeader>
           <DialogTitle>{event.eventName}</DialogTitle>
         </DialogHeader>
@@ -118,47 +126,27 @@ export const EventDetailsDialog = ({
           </Card>
 
           <div>
-            <Button
-              onClick={handleGetRecommendations}
-              disabled={isLoading}
-              className="w-full"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                  מייצר המלצות...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="ml-2 h-4 w-4" />
-                  קבל המלצות ספקים
-                </>
-              )}
+            <Button onClick={handleGetRecommendations} className="w-full">
+              <Sparkles className="ml-2 h-4 w-4" />
+              קבל המלצות ספקים
             </Button>
           </div>
 
-          {showRecommendations && result?.recommendations && (
+          {showRecommendations && recommendations.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle>המלצות ספקים</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {result.recommendations.map((rec: any, idx: number) => (
-                    <div
-                      key={idx}
-                      className="p-3 border rounded-lg space-y-2"
-                    >
+                  {recommendations.map((rec, idx) => (
+                    <div key={idx} className="p-3 border rounded-lg space-y-2">
                       <div className="flex items-start justify-between">
                         <div>
                           <p className="font-medium">{rec.supplierName}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {rec.category}
-                          </p>
+                          <p className="text-sm text-muted-foreground">{rec.category}</p>
                         </div>
-                        <Badge variant="outline">
-                          התאמה: {rec.matchScore}%
-                        </Badge>
+                        <Badge variant="outline">התאמה: {rec.matchScore}%</Badge>
                       </div>
                       <p className="text-sm">{rec.reasoning}</p>
                     </div>
@@ -168,7 +156,7 @@ export const EventDetailsDialog = ({
             </Card>
           )}
 
-          {requests && requests.length > 0 && (
+          {requests.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle>בקשות שנשלחו</CardTitle>
@@ -181,7 +169,7 @@ export const EventDetailsDialog = ({
             </Card>
           )}
 
-          {contracts && contracts.length > 0 && (
+          {contracts.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle>חוזים</CardTitle>
@@ -194,7 +182,7 @@ export const EventDetailsDialog = ({
             </Card>
           )}
 
-          {payments && payments.length > 0 && (
+          {payments.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle>תשלומים</CardTitle>
@@ -211,3 +199,4 @@ export const EventDetailsDialog = ({
     </Dialog>
   );
 };
+export default EventDetailsDialog;
