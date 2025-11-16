@@ -12,7 +12,7 @@ import { Textarea } from "./ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { useDispatch, useSelector } from "react-redux";
 import { createEvent, updateEvent, fetchEventTypes } from "../store/eventsSlice";
-import type { RootState } from "../store";
+import type { AppDispatch, RootState } from "../store";
 import { Button } from "./ui/button";
 
 // קומפוננטת Wrapper עבור Input עם מסגרת זהובה בעת ריחוף
@@ -37,41 +37,37 @@ interface EventFormDialogProps {
 }
 
 export const EventFormDialog = ({ open, onOpenChange, initialData }: EventFormDialogProps) => {
-    const dispatch = useDispatch();
+    const dispatch = useDispatch<AppDispatch>();
     const { types: eventTypes, loadingList, loadingOne } = useSelector((state: RootState) => state.events);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [formData, setFormData] = useState({
-        eventName: "",
-        eventType: "",
-        eventDate: "",
-        guestCount: "",
+        name: "",
+        type: "",
+        date: "",
+        locationRegion: "",
         budget: "",
-        location: "",
-        notes: "",
+        estimatedGuests: "",
     });
-
 
     useEffect(() => {
         if (initialData) {
             setFormData({
-                eventName: initialData.eventName || "",
-                eventType: initialData.eventType || "",
-                eventDate: initialData.eventDate || "",
-                guestCount: initialData.guestCount?.toString() || "",
+                name: initialData.name || "",
+                type: initialData.type || "",
+                date: initialData.date || "",
+                locationRegion: initialData.locationRegion || "",
                 budget: initialData.budget?.toString() || "",
-                location: initialData.location || "",
-                notes: initialData.notes || "",
+                estimatedGuests: initialData.estimatedGuests?.toString() || "",
             });
         } else {
             setFormData({
-                eventName: "",
-                eventType: "",
-                eventDate: "",
-                guestCount: "",
+                name: "",
+                type: "",
+                date: "",
+                locationRegion: "",
                 budget: "",
-                location: "",
-                notes: "",
+                estimatedGuests: "",
             });
         }
     }, [initialData, open]);
@@ -79,17 +75,11 @@ export const EventFormDialog = ({ open, onOpenChange, initialData }: EventFormDi
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
-
         const payload = {
-            name: formData.eventName,
-            type: formData.eventType,
-            date: formData.eventDate,
-            locationRegion: formData.location,
+            ...formData,
             budget: formData.budget ? parseFloat(formData.budget) : undefined,
-            estimatedGuests: formData.guestCount ? parseInt(formData.guestCount) : undefined,
-            // notes: formData.notes,
+            estimatedGuests: formData.estimatedGuests ? parseInt(formData.estimatedGuests) : undefined,
         };
-
         try {
             if (initialData?._id) {
                 await dispatch(updateEvent({ id: initialData._id, data: payload }));
@@ -103,9 +93,7 @@ export const EventFormDialog = ({ open, onOpenChange, initialData }: EventFormDi
             setIsSubmitting(false);
         }
     };
-
     const isLoading = isSubmitting || loadingList || loadingOne;
-
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[500px] bg-white dark:bg-gray-800" style={{ direction: "rtl" }}>
@@ -117,8 +105,8 @@ export const EventFormDialog = ({ open, onOpenChange, initialData }: EventFormDi
                         <Label htmlFor="eventName">שם האירוע</Label>
                         <GoldInput
                             id="eventName"
-                            value={formData.eventName}
-                            onChange={(e) => setFormData({ ...formData, eventName: e.target.value })}
+                            value={formData.name}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                             required
                         />
                     </div>
@@ -126,8 +114,8 @@ export const EventFormDialog = ({ open, onOpenChange, initialData }: EventFormDi
                     <div className="space-y-2">
                         <Label htmlFor="eventType">סוג אירוע</Label>
                         <Select
-                            value={formData.eventType}
-                            onValueChange={(value) => setFormData({ ...formData, eventType: value })}
+                            value={formData.type}
+                            onValueChange={(value) => setFormData({ ...formData, type: value })}
                             required
                         >
                             <SelectTrigger>
@@ -152,8 +140,8 @@ export const EventFormDialog = ({ open, onOpenChange, initialData }: EventFormDi
                         <GoldInput
                             id="eventDate"
                             type="date"
-                            value={formData.eventDate}
-                            onChange={(e) => setFormData({ ...formData, eventDate: e.target.value })}
+                            value={formData.date}
+                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                             required
                         />
                     </div>
@@ -164,8 +152,8 @@ export const EventFormDialog = ({ open, onOpenChange, initialData }: EventFormDi
                             <GoldInput
                                 id="guestCount"
                                 type="number"
-                                value={formData.guestCount}
-                                onChange={(e) => setFormData({ ...formData, guestCount: e.target.value })}
+                                value={formData.estimatedGuests}
+                                onChange={(e) => setFormData({ ...formData, estimatedGuests: e.target.value })}
                             />
                         </div>
 
@@ -184,8 +172,8 @@ export const EventFormDialog = ({ open, onOpenChange, initialData }: EventFormDi
                         <Label htmlFor="location">מיקום</Label>
                         <GoldInput
                             id="location"
-                            value={formData.location}
-                            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                            value={formData.locationRegion}
+                            onChange={(e) => setFormData({ ...formData, locationRegion: e.target.value })}
                         />
                     </div>
 

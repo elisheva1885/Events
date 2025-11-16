@@ -31,6 +31,8 @@ export const EventDetailsDialog = ({
   open,
   onOpenChange,
 }: EventDetailsDialogProps) => {
+    console.log("on updste ",event);
+    
   const dispatch = useDispatch();
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [recommendations, setRecommendations] = useState<any[]>([]);

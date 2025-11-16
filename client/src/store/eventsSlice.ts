@@ -68,19 +68,42 @@ export const createEvent = createAsyncThunk<Event, Event>(
   "events/create",
   async (event) => {
     const { data } = await api.post<{ success: boolean; data: Event }>("/events", event);
-    console.log("data",data);
+    console.log("data", data);
     return data.data;
   }
 );
 
 // Update event
-export const updateEvent = createAsyncThunk<Event, { id: string; data: Partial<Event> }>(
+// export const updateEvent = createAsyncThunk<Event, { id: string; data: Partial<Event> }>(
+//   "events/update",
+//   async ({ id, data }) => {
+//         console.log("UPDATE THUNK STARTED", id, data);  // 👈 בדיקה
+//     const { data: response } = await api.patch<{ event: Event }>(`/events/${id}`, data);
+//     return response.event;
+//   }
+// );
+
+export const updateEvent = createAsyncThunk<
+  Event,
+  { id: string; data: Partial<Event> },
+  { rejectValue: string }
+>(
   "events/update",
-  async ({ id, data }) => {
-    const { data: response } = await api.patch<{ event: Event }>(`/events/${id}`, data);
-    return response.event;
+  async ({ id, data }, { rejectWithValue }) => {
+    try {
+      const res = await api.patch(`/events/${id}`, data);
+
+      console.log("🔍 SERVER RAW RESPONSE:", res.data); 
+
+      return res.data.data; // ← אולי צריך לשנות
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || "Error updating");
+    }
   }
 );
+
+
+
 
 // Delete event
 export const deleteEvent = createAsyncThunk<string, string>(
@@ -140,6 +163,7 @@ const eventsSlice = createSlice({
 
       // Update
       .addCase(updateEvent.fulfilled, (state, action: PayloadAction<Event>) => {
+        console.log("UPDATE FULFILLED PAYLOAD:", action.payload);
         const idx = state.eventsList.findIndex(e => e._id === action.payload._id);
         if (idx !== -1) state.eventsList[idx] = action.payload;
         if (state.selectedEvent?._id === action.payload._id) state.selectedEvent = action.payload;
