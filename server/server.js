@@ -10,7 +10,6 @@ import { connectMongo } from './db/connect.db.js';
 import { mongoHealth } from './db/health.db.js';
 import { errorHandler } from './middlewares/error.middleware.js';
 import { initSocket } from './sockets/message.gateway.js';
-
 import session from 'express-session';
 import passport from './config/passport.config.js';
 const app = express();

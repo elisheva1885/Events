@@ -8,6 +8,11 @@ import { generateThreadId } from '../utils/thread.util.js';
 import { sendMessage } from './message.service.js';
 
 export const RequestService = {
+
+  async getRequestsByUserId(userId) {
+    const requests = await RequestRepository.getRequestsByUserId(userId);
+    return requests;
+  },
  async createSupplierRequest  ({ eventId, supplierId, clientId, notesFromClient })  {
   const [event, supplier, client] = await Promise.all([
     Event.findById(eventId),

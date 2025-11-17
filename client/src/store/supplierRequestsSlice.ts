@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
-import api from '../api/axios';
+import api from '../services/axios';
 import type { SupplierRequest } from '../types/type';
 
 export interface SupplierRequestsState {

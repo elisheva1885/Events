@@ -3,14 +3,18 @@ import {RequestService} from '../services/request.service.js';
 
 export const RequestController= {
   
-
+getAllRequestsByUserId : asyncHandler(async (req, res) => {
+  const userId =  req.user._id;
+  const {_v, ...requests} = await RequestService.getRequestsByUserId(userId);
+  res.status(200).json({ requests });
+}),
   createRequest : asyncHandler(async (req, res)=> {
 
   const { eventId } = req.params;
   const { supplierId, notesFromClient } = req.body;
   const clientId = req.user._id; 
 
-  const request = await RequestService.createRequest({
+  const request = await RequestService.createSupplierRequest({
     eventId,
     supplierId,
     clientId,
