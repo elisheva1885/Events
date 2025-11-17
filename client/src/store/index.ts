@@ -3,12 +3,18 @@ import dashboardReducer from './dashboardSlice'
 import notificationsReducer from './notificationsSlice'
 import suppliersReducer from './suppliersSlice'
 import authReducer from './authSlice'
+import eventsReducer from './eventsSlice'
+import requestReducer from './requestSlice'
+
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     dashboard: dashboardReducer,
     notifications: notificationsReducer,
     suppliers: suppliersReducer,
+    events:eventsReducer,
+    requests:requestReducer,
+
   },
 })
 

@@ -1,7 +1,7 @@
 // import { useToken } from "../hooks/useToken";
 import { store } from "../store";
 import { clearToken, setToken } from "../store/authSlice";
-import api from "./axios";
+import api from "../services/axios";
 
 // Interface עבור נתוני משתמש
 export interface User {

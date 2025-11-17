@@ -4,7 +4,7 @@ import { Card } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { ArrowRight, Mail, Phone, Calendar, Shield, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../api/axios';
+import api from '../../services/axios';
 
 interface UserData {
   _id: string;

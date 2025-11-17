@@ -9,7 +9,7 @@ import {
   blockSupplier,
   unblockSupplier,
   type ActiveSupplier
-} from '../../api/admin';
+} from '../../services/admin';
 
 export function ActiveSuppliersPage() {
   const navigate = useNavigate();

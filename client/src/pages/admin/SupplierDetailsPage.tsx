@@ -15,7 +15,7 @@ import {
   Clock,
   Image as ImageIcon
 } from 'lucide-react';
-import { getSupplierDetails, blockSupplier, unblockSupplier, approveSupplier, rejectSupplier, type SupplierDetails } from '../../api/admin';
+import { getSupplierDetails, blockSupplier, unblockSupplier, approveSupplier, rejectSupplier, type SupplierDetails } from '../../services/admin';
 
 export function SupplierDetailsPage() {
   const { id } = useParams<{ id: string }>();

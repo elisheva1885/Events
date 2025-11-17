@@ -7,7 +7,7 @@ import AdminLayout from './AdminLayout';
 import {
   getAdminStats,
   type AdminStats
-} from '../../api/admin';
+} from '../../services/admin';
 
 export function AdminDashboard() {
   const navigate = useNavigate();
