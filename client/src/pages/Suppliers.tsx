@@ -7,7 +7,7 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { MapPin, Search, Send } from "lucide-react";
-import { SupplierDetailsDialog } from "../components/SupplierDetailsDialog";
+import { SupplierDetailsDialog } from "../components/supplier/SupplierDetailsDialog";
 import { SendRequestDialog } from "../components/SendRequestDialog";
 import type { Supplier } from "../types/Supplier";
 import { getImageUrl } from "../services/uploadFile";
@@ -61,7 +61,6 @@ export default function Suppliers() {
 
   const handleSelectSupplier = (id: string) => {
     dispatch(fetchSupplierById(id));
-    setViewingSupplier(true);
   };
 
   const handleSendRequest = async ({ eventId, requestMessage,supplierId }:{ eventId: string; requestMessage: string ,supplierId:string}) => {
@@ -120,7 +119,10 @@ export default function Suppliers() {
       {suppliersWithUrls.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {suppliersWithUrls.map((s) => (
-            <Card key={s._id} className="hover:shadow-lg transition-all cursor-pointer" onClick={() => handleSelectSupplier(s._id)}>
+            <Card key={s._id} className="hover:shadow-lg transition-all cursor-pointer" onClick={() => {
+            handleSelectSupplier(s._id);
+              setViewingSupplier(true);
+            }}>
               <CardHeader>
                 {s.profileImage?.key ? (
                   <div className="w-full h-40 rounded-lg overflow-hidden mb-4">
@@ -152,7 +154,11 @@ export default function Suppliers() {
                               )}
                 
  
-                <Button className="w-full" onClick={(e) => { e.stopPropagation(); setSendRequest(true); }}>
+                <Button className="w-full" onClick={(e) => { 
+                  e.stopPropagation();
+                 setSendRequest(true); 
+                 handleSelectSupplier(s._id)
+                 }}>
                   <Send className="ml-2 h-4 w-4" /> שלח בקשה
                 </Button>
               </CardContent>
