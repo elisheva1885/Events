@@ -65,7 +65,7 @@ export default function Requests() {
                         <CardTitle className="text-lg">
                           ספק: {request.supplierId.user.name}
                         </CardTitle>
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <p className="mt-1 text-sm text-muted-foreground">
                           אירוע: {request.eventId.name}
                         </p>
                       </div>
@@ -91,12 +91,12 @@ export default function Requests() {
                       >
                         {expandedRequest === request._id ? (
                           <>
-                            <ChevronUp className="h-4 w-4 ml-1" />
+                            <ChevronUp className="w-4 h-4 ml-1" />
                             הסתר פרטים
                           </>
                         ) : (
                           <>
-                            <ChevronDown className="h-4 w-4 ml-1" />
+                            <ChevronDown className="w-4 h-4 ml-1" />
                             הצג פרטים
                           </>
                         )}
@@ -104,7 +104,7 @@ export default function Requests() {
                     </div>
 
                     {expandedRequest === request._id && (
-                      <div className="border-t pt-3 space-y-3">
+                      <div className="pt-3 space-y-3 border-t">
                         <p className="text-sm text-muted-foreground">
                           הודעה: {request.notesFromClient}
                         </p>
@@ -115,7 +115,7 @@ export default function Requests() {
                             className="flex-1"
                           > */}
                             <Button variant="outline" className="w-full">
-                              <MessageSquare className="ml-2 h-4 w-4" />
+                              <MessageSquare className="w-4 h-4 ml-2" />
                               צפה בצ'אט
                             </Button>
                           {/* </Link> */}
@@ -126,7 +126,7 @@ export default function Requests() {
                               className="flex-1"
                             >
                               <Button variant="outline" className="w-full">
-                                <FileText className="ml-2 h-4 w-4" />
+                                <FileText className="w-4 h-4 ml-2" />
                                 צפה בחוזה
                               </Button>
                             </Link>
@@ -141,7 +141,7 @@ export default function Requests() {
           ) : (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
-                <p className="text-muted-foreground mb-4">עדיין לא שלחת בקשות</p>
+                <p className="mb-4 text-muted-foreground">עדיין לא שלחת בקשות</p>
                 <Link to={'/SuppliersPage'}>
                   <Button>חפש ספקים</Button>
                 </Link>

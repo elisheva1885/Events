@@ -1,5 +1,6 @@
 // auth.repository.js
 import User from '../models/user.model.js';
+import bcrypt from 'bcrypt';
 // 🔹 יצירת משתמש חדש
 export async function createUser(userData) {
      const user = new User(userData);
@@ -24,7 +25,9 @@ export async function updateUserGoogleId(userId, googleId) {
     );
 }
 
-
+export async function findUserByGoogleId(googleId) {
+    return await User.findOne({ 'social.googleId': googleId });
+}
 
 export const createUserWithGoogle = async (profile) => {
   const tempPassword = Math.random().toString(36).slice(-8);
