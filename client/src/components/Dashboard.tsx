@@ -36,14 +36,15 @@ export default function Dashboard() {
     const dispatch:AppDispatch = useDispatch();
   const events: Event[] = useSelector((state: RootState) => state.dashboard.events);
 
-  const user = { name: "Eli sheva", firstName: "Eli", email: "elisheva@example.com" };
+  const user = useSelector((state:RootState)=>state.auth.user);
 
   useEffect(() => {
     const loadData = async () => {
+      if(user)
       await dispatch(fetchDashboardData(user.email));
     };
     loadData();
-  }, [dispatch, user.email]);
+  }, [dispatch, user?.email]);
 
 const upcomingEvent = useMemo(() => {
   if (!Array.isArray(events)) return null;
@@ -228,7 +229,7 @@ return (
     <div className="space-y-6" style={{ direction: "rtl" }}>
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">
-          שלום, {user.firstName || user.name || "משתמש"}
+          שלום, {user?.name || "משתמש"}
         </h1>
       </div>
 
