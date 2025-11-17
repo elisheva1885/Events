@@ -38,7 +38,9 @@ import { sendNotification } from '../websocket/notification.socket.js';
 
 const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
   maxRetriesPerRequest: null,
-  tls: { rejectUnauthorized: false }
+  tls: { rejectUnauthorized: false },
+  connectTimeout: 10000, // מגדיל את זמן החיבור
+  retryStrategy: times => Math.min(times * 50, 2000) // ניסיון מחדש
 });
 
 // תור לניהול התראות

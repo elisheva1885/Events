@@ -3,14 +3,14 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "../components/ui/dialog";
-import { Button } from "./ui/button";
-import { Card, CardContent } from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Card, CardContent } from "../ui/card";
+import { Badge } from "../ui/badge";
 import { Send, Phone, Mail, MapPin } from "lucide-react";
-import type { Supplier } from "../types/Supplier";
+import type { Supplier } from "../../types/Supplier";
 import { useEffect, useState } from "react";
-import { getImageUrl } from "../services/uploadFile";
+import { getImageUrl } from "../../services/uploadFile";
 
 interface SupplierDetailsDialogProps {
   supplier: Supplier;

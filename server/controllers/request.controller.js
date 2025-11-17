@@ -10,7 +10,7 @@ export const RequestController= {
   const { supplierId, notesFromClient } = req.body;
   const clientId = req.user._id; 
 
-  const request = await RequestService.createRequest({
+  const request = await RequestService.createSupplierRequest({
     eventId,
     supplierId,
     clientId,

@@ -33,7 +33,7 @@ export const createSupplierRequest = createAsyncThunk<
   { rejectValue: string }
 >("requests/create", async ({ eventId, supplierId, notesFromClient }, { rejectWithValue }) => {
   try {
-    const { data } = await api.post(`/requests/${eventId}`, {
+    const { data } = await api.post(`/events/${eventId}/requests`, {
       supplierId,
       notesFromClient,
     });
