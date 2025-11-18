@@ -6,7 +6,7 @@ import { uploadFileAwsController } from '../controllers/uploadFileAws.controller
 const router = Router();
 
 // // 🔹 יצירת חוזה חדש
-// router.post('/', authGuard, cnt.createContract);
+router.post('/', authGuard, cnt.createContract);
 
 // // 🔹 שליפת חוזה קיים
 // router.get('/:id', authGuard, cnt.getContract);
@@ -14,8 +14,13 @@ const router = Router();
 // // 🔹 חתימה על חוזה
 // router.post('/:id/sign', authGuard, cnt.signContract);
 
+// ספק - שליפת החוזים שלו
+router.get('/supplier', authGuard, cnt.getContractsBySupplier);
 
 router.get('/upload-url', uploadFileAwsController.getUploadUrl);
 router.get('/download-url', uploadFileAwsController.getDownloadUrl);
+
+// עדכון חוזה עם S3 Key
+router.put('/:id', authGuard, cnt.updateContract);
 
 export default router;

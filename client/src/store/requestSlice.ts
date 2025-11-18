@@ -22,7 +22,7 @@ export const fetchRequests = createAsyncThunk<
 >("requests/fetchAll", async (_, { rejectWithValue }) => {
   try {
     const { data } = await api.get("/requests");
-    console.log(data);
+    console.log('data',data);
     
     // return data.requests;
       return Array.isArray(data.requests) ? data.requests : Object.values(data.requests || []);

@@ -1,8 +1,17 @@
 import * as repo from '../repositories/contract.repository.js';
+import Supplier from '../models/supplier.model.js';
 
 // 🔹 יצירת חוזה חדש
 export async function createContract(data, userId) {
-    const contractData = { ...data, clientId: userId };
+    // Get the supplier document for this user
+    const supplier = await Supplier.findOne({ user: userId });
+    if (!supplier) throw new Error('Supplier not found');
+    
+    const contractData = { 
+        ...data, 
+        supplierId: supplier._id,
+        // If clientId is not provided, don't set it (it should come from the request)
+    };
     return await repo.createContract(contractData);
 }
 
@@ -29,4 +38,12 @@ export async function signContractService(contractId, user, party,signatureMeta 
   }
 
     return repo.updateContract(contractId, contract);
+}
+
+export async function getContractsBySupplier(userId) {
+    return await repo.getContractsBySupplier(userId);
+}
+
+export async function updateContractService(contractId, s3Key) {
+    return await repo.updateContract(contractId, { s3Key });
 }

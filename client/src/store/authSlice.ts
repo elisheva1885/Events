@@ -6,14 +6,14 @@ interface AuthState {
   token: string | null;
   user:User|null,
   loading:boolean,
-  error:boolean
+  error:string | null
 }
 
 const initialState: AuthState = {
   token: localStorage.getItem('token') || null,
   user:null,
   loading:false,
-  error:false
+  error:null
   
 };
 export const fetchUser = createAsyncThunk<
@@ -43,8 +43,12 @@ const authSlice = createSlice({
       state.token = action.payload;
       localStorage.setItem('token', action.payload);
     },
+    setUser: (state, action: PayloadAction<User>) => {
+      state.user = action.payload;
+    },
     clearToken: (state) => {
       state.token = null;
+      state.user = null;
       localStorage.removeItem('token');
     },
   },
@@ -59,10 +63,10 @@ const authSlice = createSlice({
       })
       .addCase(fetchUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload||'Failed to fetch user';
       })
 },
 });
 
-export const { setToken, clearToken } = authSlice.actions;
+export const { setToken, setUser, clearToken } = authSlice.actions;
 export default authSlice.reducer;

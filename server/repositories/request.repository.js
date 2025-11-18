@@ -48,11 +48,36 @@ export const RequestRepository = {
   },
 
   async updateStatus(id, status) {
-    return SupplierRequest.findByIdAndUpdate(id, { status }, { new: true });
+    return SupplierRequest.findByIdAndUpdate(id, { status }, { new: true })
+      .populate('eventId')
+      .populate({
+        path: 'supplierId',
+        populate: {
+          path: 'user',
+          select: 'name email'
+        }
+      })
+      .populate('clientId');
   },
 
   async getBySupplier(supplierId) {
     return SupplierRequest.find({ supplierId }).populate('eventId clientId');
+  },
+
+  async getBySupplierUserId(userId) {
+    const supplier = await Supplier.findOne({ user: userId });
+    if (!supplier) return [];
+    return SupplierRequest.find({ supplierId: supplier._id })
+      .populate('eventId')
+      .populate({
+        path: 'supplierId',
+        populate: {
+          path: 'user',
+          select: 'name email'
+        }
+      })
+      .populate('clientId')
+      .sort({ createdAt: -1 });
   },
 
   async getByClient(clientId) {

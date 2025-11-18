@@ -47,15 +47,24 @@ useEffect(() => {
     }
   }, [dispatch]);
   const navigationItems = useMemo(
-    () => [
-      { title: "לוח בקרה", url: "/dashboard", icon: LayoutDashboard },
-      { title: "האירועים שלי", url: "/my-events", icon: Calendar },
-      { title: "ספקים", url: "/SuppliersPage", icon: Store },
-      { title: "בקשות", url: "/requests", icon: Send },
-      { title: "צ'אט", url: "/chat", icon: MessageSquare },
-      { title: "חוזים ותשלומים", url: "/contracts-payments", icon: FileText },
-    ],
-    []
+    () => {
+      // אם המשתמש הוא ספק, הצג רק את דשבורד הספק
+      if (user?.role === "supplier") {
+        return [
+          { title: "דשבורד ספק", url: "/dashboard", icon: LayoutDashboard },
+        ];
+      }
+      // עבור לקוחות וניהול
+      return [
+        { title: "לוח בקרה", url: "/dashboard", icon: LayoutDashboard },
+        { title: "האירועים שלי", url: "/my-events", icon: Calendar },
+        { title: "ספקים", url: "/SuppliersPage", icon: Store },
+        { title: "בקשות", url: "/requests", icon: Send },
+        { title: "צ'אט", url: "/chat", icon: MessageSquare },
+        { title: "חוזים ותשלומים", url: "/contracts-payments", icon: FileText },
+      ];
+    },
+    [user?.role]
   );
 
   const userInitials = useMemo(() => {

@@ -18,3 +18,15 @@ export const signContract = asyncHandler(async(req, res) =>{
     const updatedContract = await srv.signContractService(req.params.id, req.user,party, req.body.signatureMeta);
         res.status(201).json({ message: 'Contract signed successfully', updatedContract });
 });
+
+export const getContractsBySupplier = asyncHandler(async(req, res) => {
+    const contracts = await srv.getContractsBySupplier(req.user._id);
+    res.json({ contracts });
+});
+
+export const updateContract = asyncHandler(async(req, res) => {
+    const { id } = req.params;
+    const { s3Key } = req.body;
+    const contract = await srv.updateContractService(id, s3Key);
+    res.json({ contract });
+});

@@ -6,9 +6,11 @@ import api from "./axios";
 // Interface עבור נתוני משתמש
 export interface User {
   id: string;
+  _id?: string;
   name: string;
   email: string;
   phone?: string;
+  role?: "client" | "supplier" | "admin";
 }
 
 // Interface עבור תשובת התחברות/הרשמה

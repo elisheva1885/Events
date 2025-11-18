@@ -16,7 +16,7 @@ const allowAll = [ 'user', 'admin', 'supplier' ];
 router.get(
   '/',
   authGuard,
-  // roleGuard(allowClientAdmin),
+  roleGuard(allowClientAdmin),
   SupplierController.getAll
 );
 
@@ -24,7 +24,7 @@ router.get(
 router.get(
   '/:id',
   authGuard,
-  // roleGuard(allowClientAdmin),
+  roleGuard(allowClientAdmin),
   validateObjectId('id'),
   SupplierController.getOne
 );

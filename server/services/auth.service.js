@@ -28,7 +28,7 @@ export async function login(email, password) {
     if (!valid) throw new AppError(401, 'Invalid credentials');
 
     const token = jwt.sign({ id: user._id, role: user.role }, SECRET, { expiresIn: '1d' });
-    return { token };
+    return { token, user };
 }
 
 // Google Auth - טיפול בהתחברות עם Google

@@ -1,6 +1,6 @@
 import { Routes, Route, useNavigate } from "react-router-dom";
 import AppLayout from "./pages/AppLayout";
-import Dashboard from "./components/Dashboard";
+import DashboardRouter from "./components/DashboardRouter";
 import MyEvents from "./pages/MyEvents";
 import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
@@ -49,7 +49,7 @@ export default function AppRouter() {
         element={
           <ProtectedRoute>
             <AppLayout>
-              <Dashboard />
+              <DashboardRouter />
             </AppLayout>
           </ProtectedRoute>
 
