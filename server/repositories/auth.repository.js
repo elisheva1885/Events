@@ -1,5 +1,6 @@
 // auth.repository.js
 import User from '../models/user.model.js';
+import bcrypt from 'bcrypt';
 // 🔹 יצירת משתמש חדש
 export async function createUser(userData) {
      const user = new User(userData);
@@ -11,6 +12,10 @@ export async function createUser(userData) {
 export async function findUserByEmail(email) {
     // TODO: לממש התחברות ובדיקת סיסמה
   return await User.findOne({ email });
+}
+
+export async function findUserByGoogleId(googleId) {
+  return await User.findOne({ 'social.googleId': googleId });
 }
 
 
