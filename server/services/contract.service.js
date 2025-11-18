@@ -44,6 +44,10 @@ export async function getContractsBySupplier(userId) {
     return await repo.getContractsBySupplier(userId);
 }
 
+export async function getContractsByClient(userId) {
+    return await repo.getContractsByClient(userId);
+}
+
 export async function updateContractService(contractId, s3Key) {
     return await repo.updateContract(contractId, { s3Key });
 }

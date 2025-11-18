@@ -61,7 +61,7 @@ useEffect(() => {
         { title: "ספקים", url: "/SuppliersPage", icon: Store },
         { title: "בקשות", url: "/requests", icon: Send },
         { title: "צ'אט", url: "/chat", icon: MessageSquare },
-        { title: "חוזים ותשלומים", url: "/contracts-payments", icon: FileText },
+        { title: "חוזים", url: "/contracts", icon: FileText },
       ];
     },
     [user?.role]

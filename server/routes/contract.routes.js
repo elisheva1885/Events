@@ -5,17 +5,20 @@ import { connect } from 'mongoose';
 import { uploadFileAwsController } from '../controllers/uploadFileAws.controller.js';
 const router = Router();
 
-// // 🔹 יצירת חוזה חדש
+// 🔹 יצירת חוזה חדש
 router.post('/', authGuard, cnt.createContract);
 
-// // 🔹 שליפת חוזה קיים
-// router.get('/:id', authGuard, cnt.getContract);
+// 🔹 לקוח - שליפת החוזים שלו (קליינט)
+router.get('/', authGuard, cnt.getContractsByClient);
 
-// // 🔹 חתימה על חוזה
-// router.post('/:id/sign', authGuard, cnt.signContract);
-
-// ספק - שליפת החוזים שלו
+// 🔹 ספק - שליפת החוזים שלו
 router.get('/supplier', authGuard, cnt.getContractsBySupplier);
+
+// 🔹 שליפת חוזה קיים
+router.get('/:id', authGuard, cnt.getContract);
+
+// 🔹 חתימה על חוזה
+router.post('/:id/sign', authGuard, cnt.signContract);
 
 router.get('/upload-url', uploadFileAwsController.getUploadUrl);
 router.get('/download-url', uploadFileAwsController.getDownloadUrl);

@@ -1,13 +1,14 @@
 import { Routes, Route, useNavigate } from "react-router-dom";
 import AppLayout from "./pages/AppLayout";
-import DashboardRouter from "./components/DashboardRouter";
 import MyEvents from "./pages/MyEvents";
 import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import Suppliers from "./pages/Suppliers";
+import ContractsPage from "./pages/ContractsPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Requests from "./pages/Request";
+import DashboardRouter from "./components/DashboardRouter";
 
 export default function AppRouter() {
   const navigate = useNavigate();
@@ -81,6 +82,16 @@ export default function AppRouter() {
           <ProtectedRoute>
             <AppLayout>
               <Requests />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/contracts"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <ContractsPage />
             </AppLayout>
           </ProtectedRoute>
         }

@@ -2,11 +2,12 @@ import { useEffect, useState, useCallback } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { CheckCircle, XCircle, Clock, FileText, AlertCircle, Download, Upload } from "lucide-react";
+import { CheckCircle, XCircle, Clock, FileText, AlertCircle, Download, Upload, Plus } from "lucide-react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { uploadFileToS3, getImageUrl } from "../../services/uploadFile";
 import api from "../../services/axios";
+import { CreateContractDialog } from "./CreateContractDialog";
 
 interface SupplierRequest {
   _id: string;
@@ -60,6 +61,7 @@ export default function SupplierDashboard() {
   const [uploadingContractId, setUploadingContractId] = useState<string | null>(null);
   const [showContractModal, setShowContractModal] = useState(false);
   const [selectedContractId, setSelectedContractId] = useState<string | null>(null);
+  const [showCreateContractDialog, setShowCreateContractDialog] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -381,6 +383,13 @@ export default function SupplierDashboard() {
         </div>
       ) : (
         <div className="space-y-4">
+          <Button
+            onClick={() => setShowCreateContractDialog(true)}
+            className="bg-green-600 hover:bg-green-700 w-full"
+          >
+            <Plus className="w-4 h-4 ml-2" />
+            יצירת חוזה חדש
+          </Button>
           {contracts.length === 0 ? (
             <Card>
               <CardContent className="py-8">
@@ -516,6 +525,13 @@ export default function SupplierDashboard() {
           </Card>
         </div>
       )}
+
+      <CreateContractDialog
+        open={showCreateContractDialog}
+        onOpenChange={setShowCreateContractDialog}
+        requests={requests}
+        onContractCreated={fetchData}
+      />
     </div>
   );
 }

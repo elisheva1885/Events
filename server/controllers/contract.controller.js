@@ -24,6 +24,11 @@ export const getContractsBySupplier = asyncHandler(async(req, res) => {
     res.json({ contracts });
 });
 
+export const getContractsByClient = asyncHandler(async(req, res) => {
+    const contracts = await srv.getContractsByClient(req.user._id);
+    res.json({ contracts });
+});
+
 export const updateContract = asyncHandler(async(req, res) => {
     const { id } = req.params;
     const { s3Key } = req.body;

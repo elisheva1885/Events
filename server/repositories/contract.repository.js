@@ -37,3 +37,18 @@ export async function getContractsBySupplier(userId) {
         .populate('supplierId')
         .sort({ createdAt: -1 });
 }
+
+export async function getContractsByClient(userId) {
+    // חפש את כל החוזים שמקושרים ללקוח הזה
+    return await Contract.find({ clientId: userId })
+        .populate('eventId')
+        .populate('clientId')
+        .populate({
+            path: 'supplierId',
+            populate: {
+                path: 'user',
+                select: 'name email'
+            }
+        })
+        .sort({ createdAt: -1 });
+}

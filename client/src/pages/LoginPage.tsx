@@ -3,9 +3,6 @@ import { Mail, Lock, ArrowLeft, Sparkles } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { login } from '../services/auth';
 import { GoogleLoginButton } from '../components/shared/GoogleLoginButton';
-import { useDispatch } from 'react-redux';
-import { setUser, fetchUser } from '../store/authSlice';
-import type { AppDispatch } from '../store';
 
 interface LoginPageProps {
   onLogin: () => void;
@@ -13,7 +10,6 @@ interface LoginPageProps {
 }
 
 export function LoginPage({ onLogin, onNavigate }: LoginPageProps) {
-  const dispatch = useDispatch<AppDispatch>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -29,14 +25,7 @@ export function LoginPage({ onLogin, onNavigate }: LoginPageProps) {
     
 
     try {
-      const response = await login({ email, password });
-      // שמור את המשתמש בחנות
-      if (response.user) {
-        dispatch(setUser(response.user));
-      } else {
-        // או טען את נתוני המשתמש מהשרת אם לא קיבלנו אותו בתגובה
-        await dispatch(fetchUser());
-      }
+      await login({ email, password });
       onLogin(); 
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'שגיאה בהתחברות. אנא נסה שוב.';
@@ -153,11 +142,11 @@ export function LoginPage({ onLogin, onNavigate }: LoginPageProps) {
           </div>
 
           {/* Google Login Button */}
-          {/* <GoogleLoginButton
+          <GoogleLoginButton
             onSuccess={onLogin}
             onError={setError}
             mode="login"
-          /> */}
+          />
 
           <div className="mt-10 text-center">
             <p className="text-[#6d6d78] font-light">
