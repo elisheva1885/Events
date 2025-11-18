@@ -1,7 +1,7 @@
 // import { useToken } from "../hooks/useToken";
 import { store } from "../store";
 import { clearToken, setToken } from "../store/authSlice";
-import api from "./axios";
+import api from "../services/axios";
 
 // Interface עבור נתוני משתמש
 export interface User {
@@ -67,12 +67,10 @@ export const login = async (data: LoginData): Promise<AuthResponse> => {
 };
 
 // פונקציית הרשמה
-export const register = async (data: RegisterData,role:string): Promise<AuthResponse> => {
+export const register = async (data: RegisterData): Promise<AuthResponse> => {
   try {
     console.log("Sending registration data:", data);
-    // if(d)
-    const route=role==='supplier'?'suppliers/register':'auth/register';
-    const response = await api.post(route, data);
+    const response = await api.post("/auth/register", data);
     console.log("Server response:", response.data);
 
     // שמירת רק הטוקן ב-localStorage
@@ -155,7 +153,7 @@ export const googleAuth = async (data: GoogleAuthData): Promise<AuthResponse> =>
     
     // שמירת הטוקן ב-localStorage
     if (response.data.token) {
-      store.dispatch(setToken(response.data.token));
+      localStorage.setItem('token', response.data.token);
     }
     
     return response.data;

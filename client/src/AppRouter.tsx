@@ -7,28 +7,45 @@ import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import Suppliers from "./pages/Suppliers";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import Requests from "./pages/Request";
+import { AdminDashboard } from "./pages/admin/AdminDashboard";
+import { PendingSuppliersPage } from "./pages/admin/PendingSuppliersPage";
+import { ActiveSuppliersPage } from "./pages/admin/ActiveSuppliersPage";
+import { SupplierDetailsPage } from "./pages/admin/SupplierDetailsPage";
+import { UsersPage } from "./pages/admin/UsersPage";
+import { getUserRole } from "./api/auth";
 
 export default function AppRouter() {
   const navigate = useNavigate();
 
   const handleNavigate = (page: "landing" | "login" | "register") => {
-    console.log('handleNavigate', page);
+    console.log('handleNavigate', page); 
     if (page === "landing") navigate("/");
     else if (page === "login") navigate("/login");
     else if (page === "register") navigate("/register");
   };
 
   const handleLogin = () => {
-    // TODO: Add login logic here
     console.log("User logged in");
-    navigate("/dashboard");
+    
+    // בדיקת תפקיד המשתמש והפניה לדשבורד המתאים
+    const userRole = getUserRole();
+    if (userRole === 'admin') {
+      navigate("/admin/dashboard");
+    } else {
+      navigate("/dashboard");
+    }
   };
 
   const handleRegister = () => {
-    // TODO: Add registration logic here
     console.log("User registered");
-    navigate("/dashboard");
+    
+    // בדיקת תפקיד המשתמש והפניה לדשבורד המתאים
+    const userRole = getUserRole();
+    if (userRole === 'admin') {
+      navigate("/admin/dashboard");
+    } else {
+      navigate("/dashboard");
+    }
   };
 
   return (
@@ -52,11 +69,12 @@ export default function AppRouter() {
               <Dashboard />
             </AppLayout>
           </ProtectedRoute>
-
+              
         }
       />
+
       <Route
-        path="/SuppliersPage"
+        path="/suppliers"
         element={
           <ProtectedRoute>
             <AppLayout>
@@ -65,6 +83,7 @@ export default function AppRouter() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/my-events"
         element={
@@ -75,17 +94,48 @@ export default function AppRouter() {
           </ProtectedRoute>
         }
       />
+
+      {/* Admin Routes */}
       <Route
-        path="/requests"
+        path="/admin/dashboard"
         element={
-          <ProtectedRoute>
-            <AppLayout>
-              <Requests />
-            </AppLayout>
+          <ProtectedRoute requiredRole="admin">
+            <AdminDashboard />
           </ProtectedRoute>
         }
       />
-
-    </Routes >
+      <Route
+        path="/admin/pending-suppliers"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <PendingSuppliersPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/active-suppliers"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <ActiveSuppliersPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/suppliers/:id"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <SupplierDetailsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <UsersPage />
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
   );
 }

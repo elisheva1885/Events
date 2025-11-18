@@ -145,7 +145,7 @@ import api from "../../services/axios";
 //   media?: { images: { url: string; alt: string }[]; videos: string[] };
 // }
 
-export default function MediaUploader(onRegister: () => void) {
+export default function MediaUploader({ onRegister }: { onRegister: () => void }) {
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
