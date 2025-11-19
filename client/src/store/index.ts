@@ -5,7 +5,7 @@ import suppliersReducer from './suppliersSlice'
 import authReducer from './authSlice'
 import eventsReducer from './eventsSlice'
 import chatReducer from './chatSlice'
-import requestReducer from './requestSlice'
+import requestReducer from './supplierRequestsSlice'
 
 export const store = configureStore({
   reducer: {
@@ -15,7 +15,7 @@ export const store = configureStore({
     suppliers: suppliersReducer,
     events: eventsReducer,
     chat: chatReducer,
-    requests:requestReducer,
+    requests: requestReducer,
   },
 })
 

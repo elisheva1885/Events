@@ -3,7 +3,7 @@ const { Schema, model, Types } = mongoose;
 // הודעות Real-time עם שמירה קצרת-טווח (TTL)
 const participantSub = new Schema(
   {
-    id:   { type: Types.ObjectId, required: true },
+    id: { type: Types.ObjectId, required: true },
     type: { type: String, enum: ['user', 'supplier'], required: true }
   },
   { _id: false }
@@ -11,13 +11,18 @@ const participantSub = new Schema(
 
 const messageSchema = new Schema(
   {
-    threadId: { type: Types.ObjectId, required: true, index: true }, // אפשר לזהות לפי event+supplier+client
+    threadId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Thread",
+      required: true,
+    },
     from: participantSub,
-    to:   participantSub,
+    to: participantSub,
     body: { type: String, required: true, trim: true },
 
     // TTL: המסמך יימחק בזמן השווה לערך השדה הזה
-    ttlAt: { type: Date, index: { expireAfterSeconds: 0 } }
+    ttlAt: { type: Date, index: { expireAfterSeconds: 0 } },
+    isRead: { type: Boolean, default: false }
   },
   { timestamps: { createdAt: true, updatedAt: false } }
 );

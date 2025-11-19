@@ -1,54 +1,108 @@
-import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
-import api from '../services/axios';
-import type { SupplierRequest } from '../types/type';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
+import api from "../services/axios";
+import type { Request } from "../types/Request";
 
-export interface SupplierRequestsState {
-  requestsList: SupplierRequest[];
+export interface RequestState {
+  requests: Request[];
   loading: boolean;
   error?: string;
 }
 
-const initialState: SupplierRequestsState = {
-  requestsList: [],
+const initialState: RequestState = {
+  requests: [],
   loading: false,
   error: undefined,
 };
 
-export const fetchSupplierRequests = createAsyncThunk<SupplierRequest[], { clientEmail?: string } | void>(
-  'supplierRequests/fetchAll',
-  async (params) => {
-    // try to follow existing conventions: server may accept clientEmail query param
-    const res = await api.get('/requests', { params });
-    // API might return { data: [...] } or raw array
-    return (res.data?.data ?? res.data) as SupplierRequest[];
+// Fetch all requests
+export const fetchRequests = createAsyncThunk<Request[], { clientEmail?: string } | void, { rejectValue: string }>(
+  "requests/fetchAll",
+  async (params, { rejectWithValue }) => {
+    try {
+      const { data } = await api.get("/requests", { params });
+      return Array.isArray(data.requests) ? data.requests : Object.values(data.requests || []);
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || "Failed to fetch requests");
+    }
   }
 );
 
-const supplierRequestsSlice = createSlice({
-  name: 'supplierRequests',
+// Create supplier request
+export const createSupplierRequest = createAsyncThunk<Request, { eventId: string; supplierId: string; notesFromClient: string }, { rejectValue: string }>(
+  "requests/create",
+  async ({ eventId, supplierId, notesFromClient }, { rejectWithValue }) => {
+    try {
+      const { data } = await api.post(`/events/${eventId}/requests`, { supplierId, notesFromClient });
+      // data.request + data.threadId
+      return { ...data.request, threadId: data.threadId };
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || "Failed to create request");
+    }
+  }
+);
+
+// Approve request
+export const approveRequest = createAsyncThunk<Request, string, { rejectValue: string }>(
+  "requests/approve",
+  async (id, { rejectWithValue }) => {
+    try {
+      const { data } = await api.patch(`/requests/approve/${id}`);
+      return data.request;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || "Failed to approve request");
+    }
+  }
+);
+
+// Decline request
+export const declineRequest = createAsyncThunk<Request, string, { rejectValue: string }>(
+  "requests/decline",
+  async (id, { rejectWithValue }) => {
+    try {
+      const { data } = await api.patch(`/requests/decline/${id}`);
+      return data.request;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || "Failed to decline request");
+    }
+  }
+);
+
+const requestSlice = createSlice({
+  name: "requests",
   initialState,
-  reducers: {
-    clearRequests: (state) => {
-      state.requestsList = [];
-      state.error = undefined;
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchSupplierRequests.pending, (state) => {
-        state.loading = true;
-        state.error = undefined;
-      })
-      .addCase(fetchSupplierRequests.fulfilled, (state, action: PayloadAction<SupplierRequest[]>) => {
+      // Fetch
+      .addCase(fetchRequests.pending, (state) => { state.loading = true; })
+      .addCase(fetchRequests.fulfilled, (state, action) => { state.loading = false; state.requests = action.payload; })
+      .addCase(fetchRequests.rejected, (state, action) => { state.loading = false; state.error = action.payload;   console.log("Fetched requests on redux:", action.payload);
+})
+
+      // Create
+      .addCase(createSupplierRequest.pending, (state) => { state.loading = true; })
+      .addCase(createSupplierRequest.fulfilled, (state, action) => { state.loading = false; state.requests.push(action.payload); })
+      .addCase(createSupplierRequest.rejected, (state, action) => { state.loading = false; state.error = action.payload; })
+
+      // Approve
+      .addCase(approveRequest.pending, (state) => { state.loading = true; })
+      .addCase(approveRequest.fulfilled, (state, action) => {
         state.loading = false;
-        state.requestsList = action.payload;
+        const idx = state.requests.findIndex(r => r._id === action.payload._id);
+        if (idx !== -1) state.requests[idx] = action.payload;
       })
-      .addCase(fetchSupplierRequests.rejected, (state, action) => {
+      .addCase(approveRequest.rejected, (state, action) => { state.loading = false; state.error = action.payload; })
+
+      // Decline
+      .addCase(declineRequest.pending, (state) => { state.loading = true; })
+      .addCase(declineRequest.fulfilled, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
-      });
-  },
+        const idx = state.requests.findIndex(r => r._id === action.payload._id);
+        if (idx !== -1) state.requests[idx] = action.payload;
+      })
+      .addCase(declineRequest.rejected, (state, action) => { state.loading = false; state.error = action.payload; });
+  }
 });
 
-export const { clearRequests } = supplierRequestsSlice.actions;
-export default supplierRequestsSlice.reducer;
+export default requestSlice.reducer;

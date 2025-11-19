@@ -1,94 +1,177 @@
-import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
-import api from '../services/axios';
-import type { Message } from '../types/type';
+import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
+import api from "../services/axios";
+import type { Thread } from "../types/Thread";
+import type { Message } from "../types/type";
 
+// ==========================
+//     STATE
+// ==========================
 export interface ChatState {
-  messages: Message[];
+  threads: Thread[];
+  messagesByThread: Record<string, Message[]>;
   loading: boolean;
   error?: string;
 }
 
 const initialState: ChatState = {
-  messages: [],
+  threads: [],
+  messagesByThread: {},
   loading: false,
   error: undefined,
 };
 
-// Fetch messages for a thread (server model: messages)
-export const fetchMessages = createAsyncThunk<Message[], { threadId: string }>(
-  'chat/fetchMessages',
+// ==========================
+//     THUNKS
+// ==========================
+
+// 1️⃣ Fetch user threads
+export const fetchUserThreads = createAsyncThunk<
+  Thread[],
+  { userId: string },
+  { rejectValue: string }
+>(
+  "chat/fetchUserThreads",
+  async ({ userId }, { rejectWithValue }) => {
+    console.log("[Thunk] fetchUserThreads called with userId:", userId);
+    try {
+      const res = await api.get(`/threads/user/${userId}`);
+      console.log("[Thunk] fetchUserThreads response:", res.data);
+      return res.data?.data ?? res.data;
+    } catch (err: any) {
+      console.error("[Thunk] fetchUserThreads error:", err);
+      return rejectWithValue(err.response?.data?.message || "Error fetching threads");
+    }
+  }
+);
+
+// 2️⃣ Fetch messages for a thread
+export const fetchMessages = createAsyncThunk<
+  { threadId: string; messages: Message[] },
+  { threadId: string },
+  { rejectValue: string }
+>(
+  "chat/fetchMessages",
   async ({ threadId }, { rejectWithValue }) => {
+    console.log("[Thunk] fetchMessages called for threadId:", threadId);
     try {
-      // server might expose: GET /messages?threadId=... or GET /messages/:threadId
-      const res = await api.get(`/messages`, { params: { threadId } });
-      // Prefer res.data.data if API wraps payload, otherwise try res.data
-      return (res.data?.data ?? res.data) as Message[];
+      const res = await api.get(`/messages/${threadId}`);
+      console.log("[Thunk] fetchMessages response:", res.data);
+      const messages = res.data?.data ?? res.data;
+      return { threadId, messages };
     } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || 'Error fetching messages');
+      console.error("[Thunk] fetchMessages error:", err);
+      return rejectWithValue(err.response?.data?.message || "Error fetching messages");
     }
   }
 );
 
-export const sendMessage = createAsyncThunk<Message, { threadId: string; body: string }, { rejectValue: string }>(
-  'chat/sendMessage',
+// 3️⃣ Send message
+export const sendMessage = createAsyncThunk<
+  Message,
+  { threadId: string; body: string },
+  { rejectValue: string }
+>(
+  "chat/sendMessage",
   async ({ threadId, body }, { rejectWithValue }) => {
+    console.log("[Thunk] sendMessage called for threadId:", threadId, "body:", body);
     try {
-      const res = await api.post('/messages', { threadId, body });
-      return (res.data?.data ?? res.data) as Message;
+      const res = await api.post("/messages", { threadId, body });
+      console.log("[Thunk] sendMessage response:", res.data);
+      return res.data?.data ?? res.data;
     } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || 'Error sending message');
+      console.error("[Thunk] sendMessage error:", err);
+      return rejectWithValue(err.response?.data?.message || "Error sending message");
     }
   }
 );
 
-export const updateMessage = createAsyncThunk<Message, { id: string; data: Partial<Message> }, { rejectValue: string }>(
-  'chat/updateMessage',
+// 4️⃣ Update message
+export const updateMessage = createAsyncThunk<
+  Message,
+  { id: string; data: Partial<Message> },
+  { rejectValue: string }
+>(
+  "chat/updateMessage",
   async ({ id, data }, { rejectWithValue }) => {
+    console.log("[Thunk] updateMessage called for id:", id, "data:", data);
     try {
       const res = await api.patch(`/messages/${id}`, data);
-      return (res.data?.data ?? res.data) as Message;
+      console.log("[Thunk] updateMessage response:", res.data);
+      return res.data?.data ?? res.data;
     } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || 'Error updating message');
+      console.error("[Thunk] updateMessage error:", err);
+      return rejectWithValue(err.response?.data?.message || "Error updating message");
     }
   }
 );
 
+// ==========================
+//     SLICE
+// ==========================
 const chatSlice = createSlice({
-  name: 'chat',
+  name: "chat",
   initialState,
   reducers: {
-    clearMessages: (state) => {
-      state.messages = [];
-      state.error = undefined;
+    clearMessages: (state, action: PayloadAction<string>) => {
+      const threadId = action.payload;
+      console.log("[Reducer] clearMessages for threadId:", threadId);
+      delete state.messagesByThread[threadId];
     },
+
     addLocalMessage: (state, action: PayloadAction<Message>) => {
-      // for optimistic updates
-      state.messages.push(action.payload);
+      const msg = action.payload;
+      console.log("[Reducer] addLocalMessage:", msg);
+      if (!state.messagesByThread[msg.threadId]) {
+        state.messagesByThread[msg.threadId] = [];
+      }
+      state.messagesByThread[msg.threadId].push(msg);
     },
   },
+
   extraReducers: (builder) => {
     builder
-      .addCase(fetchMessages.pending, (state) => {
+      // Threads
+      .addCase(fetchUserThreads.pending, (state) => {
+        console.log("[ExtraReducer] fetchUserThreads pending");
         state.loading = true;
         state.error = undefined;
       })
-      .addCase(fetchMessages.fulfilled, (state, action: PayloadAction<Message[]>) => {
+      .addCase(fetchUserThreads.fulfilled, (state, action) => {
+        console.log("[ExtraReducer] fetchUserThreads fulfilled:", action.payload);
         state.loading = false;
-        state.messages = action.payload;
+        state.threads = action.payload;
       })
-      .addCase(fetchMessages.rejected, (state, action) => {
+      .addCase(fetchUserThreads.rejected, (state, action) => {
+        console.error("[ExtraReducer] fetchUserThreads rejected:", action.payload);
         state.loading = false;
-        state.error = action.payload as string || action.error.message;
+        state.error = action.payload || action.error?.message;
       })
 
-      .addCase(sendMessage.pending, (state) => {
-        state.error = undefined;
+      // Messages
+      .addCase(fetchMessages.fulfilled, (state, action) => {
+        console.log("[ExtraReducer] fetchMessages fulfilled for threadId:", action.payload.threadId);
+        state.messagesByThread[action.payload.threadId] = action.payload.messages;
       })
-      .addCase(sendMessage.fulfilled, (state, action: PayloadAction<Message>) => {
-        state.messages.push(action.payload);
+
+      // Send message
+      .addCase(sendMessage.fulfilled, (state, action) => {
+        console.log("[ExtraReducer] sendMessage fulfilled:", action.payload);
+        const msg = action.payload;
+        if (!state.messagesByThread[msg.threadId]) {
+          state.messagesByThread[msg.threadId] = [];
+        }
+        state.messagesByThread[msg.threadId].push(msg);
       })
-      .addCase(sendMessage.rejected, (state, action) => {
-        state.error = action.payload as string || action.error.message;
+
+      // Update message
+      .addCase(updateMessage.fulfilled, (state, action) => {
+        console.log("[ExtraReducer] updateMessage fulfilled:", action.payload);
+        const msg = action.payload;
+        const list = state.messagesByThread[msg.threadId];
+        if (!list) return;
+
+        const idx = list.findIndex(m => m._id === msg._id);
+        if (idx !== -1) list[idx] = msg;
       });
   },
 });

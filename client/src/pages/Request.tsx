@@ -4,7 +4,7 @@ import {
   fetchRequests, // פעולה אסינכרונית שצריך להגדיר ב־Redux
   approveRequest,
   declineRequest,
-} from "../store/requestSlice";
+} from "../store/supplierRequestsSlice";
 
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
@@ -142,7 +142,7 @@ export default function Requests() {
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <p className="mb-4 text-muted-foreground">עדיין לא שלחת בקשות</p>
-                <Link to={'/SuppliersPage'}>
+                <Link to={'/suppliers'}>
                   <Button>חפש ספקים</Button>
                 </Link>
               </CardContent>

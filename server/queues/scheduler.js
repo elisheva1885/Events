@@ -32,50 +32,49 @@
 
 // notificationWorker.on('completed', job => console.log(`✅ Notification ${job.id} sent`));
 // notificationWorker.on('failed', (job, err) => console.error(`❌ Notification ${job.id} failed`, err));
-import { Queue, Worker } from 'bullmq';
-import Redis from 'ioredis';
-import { sendNotification } from '../websocket/notification.socket.js';
+// import { Queue, Worker } from 'bullmq';
+// import Redis from 'ioredis';
+// import { sendNotification } from '../websocket/notification.socket.js';
 
-const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
-  maxRetriesPerRequest: null,
-  tls: { rejectUnauthorized: false },
-  connectTimeout: 10000, // מגדיל את זמן החיבור
-  retryStrategy: times => Math.min(times * 50, 2000) // ניסיון מחדש
-});
+// const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+//   maxRetriesPerRequest: null,
+//   connectTimeout: 10000, // מגדיל את זמן החיבור
+//   retryStrategy: times => Math.min(times * 50, 2000) // ניסיון מחדש
+// });
 
-// תור לניהול התראות
-
+// // תור לניהול התראות
 
 
-// תור לניהול התראות (גם מיידיות וגם עתידיות)
-export const notificationQueue = new Queue('notifications', { connection });
 
-// Worker שמבצע שליחה בזמן הנכון
-export const notificationWorker = new Worker(
-  'notifications',
-  async (job) => {
-    const notification = job.data;
+// // תור לניהול התראות (גם מיידיות וגם עתידיות)
+// export const notificationQueue = new Queue('notifications', { connection });
 
-    // שולח בפועל דרך Socket.IO
-    await sendNotification(notification);
+// // Worker שמבצע שליחה בזמן הנכון
+// export const notificationWorker = new Worker(
+//   'notifications',
+//   async (job) => {
+//     const notification = job.data;
 
-    // שומר ב־Redis רק אחרי השליחה (כדי שיופיע ב־client)
-    const listKey = `user:${notification.userId}:notifications`;
-    const mapKey = `user:${notification.userId}:notificationMap`;
+//     // שולח בפועל דרך Socket.IO
+//     await sendNotification(notification);
 
-    await connection.rpush(listKey, notification.id);
-    await connection.hset(mapKey, notification.id, JSON.stringify(notification));
+//     // שומר ב־Redis רק אחרי השליחה (כדי שיופיע ב־client)
+//     const listKey = `user:${notification.userId}:notifications`;
+//     const mapKey = `user:${notification.userId}:notificationMap`;
 
-    console.log(`✅ Notification sent to user ${notification.userId}`);
-  },
-  { connection }
-);
+//     await connection.rpush(listKey, notification.id);
+//     await connection.hset(mapKey, notification.id, JSON.stringify(notification));
 
-// אירועי דיבוג
-notificationWorker.on('completed', (job) => {
-  console.log(`🎉 Job ${job.id} completed`);
-});
+//     console.log(`✅ Notification sent to user ${notification.userId}`);
+//   },
+//   { connection }
+// );
 
-notificationWorker.on('failed', (job, err) => {
-  console.error(`❌ Job ${job?.id} failed`, err);
-});
+// // אירועי דיבוג
+// notificationWorker.on('completed', (job) => {
+//   console.log(`🎉 Job ${job.id} completed`);
+// });
+
+// notificationWorker.on('failed', (job, err) => {
+//   console.error(`❌ Job ${job?.id} failed`, err);
+// });

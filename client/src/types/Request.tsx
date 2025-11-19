@@ -11,5 +11,6 @@ export interface Request {
   notesFromClient: string;
   status: "ממתין" | "אושר" | "נדחה" | "פג תוקף";
   eventId: Event
-  supplierId: Supplier
+  supplierId: Supplier,
+  threadId?: string;
 }

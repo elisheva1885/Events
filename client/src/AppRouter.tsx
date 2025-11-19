@@ -13,14 +13,14 @@ import { PendingSuppliersPage } from "./pages/admin/PendingSuppliersPage";
 import { ActiveSuppliersPage } from "./pages/admin/ActiveSuppliersPage";
 import { SupplierDetailsPage } from "./pages/admin/SupplierDetailsPage";
 import { UsersPage } from "./pages/admin/UsersPage";
-import { getUserRole } from "./services/auth";
+import { getUserRole } from "./api/auth";
 import Requests from "./pages/Request";
 
 export default function AppRouter() {
   const navigate = useNavigate();
 
   const handleNavigate = (page: "landing" | "login" | "register") => {
-    console.log('handleNavigate', page);
+    console.log('handleNavigate', page); 
     if (page === "landing") navigate("/");
     else if (page === "login") navigate("/login");
     else if (page === "register") navigate("/register");
@@ -72,16 +72,7 @@ return (
         </ProtectedRoute>
       }
     />
-    <Route
-      path="/SuppliersPage"
-      element={
-        <ProtectedRoute>
-          <AppLayout>
-            <Suppliers />
-          </AppLayout>
-        </ProtectedRoute>
-      }
-    />
+    
     <Route
       path="/my-events"
       element={
@@ -113,47 +104,60 @@ return (
       }
     />
 
-    {/* Admin Routes */}
-    <Route
-      path="/admin/dashboard"
-      element={
-        <ProtectedRoute requiredRole="admin">
-          <AdminDashboard />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/admin/pending-suppliers"
-      element={
-        <ProtectedRoute requiredRole="admin">
-          <PendingSuppliersPage />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/admin/active-suppliers"
-      element={
-        <ProtectedRoute requiredRole="admin">
-          <ActiveSuppliersPage />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/admin/suppliers/:id"
-      element={
-        <ProtectedRoute requiredRole="admin">
-          <SupplierDetailsPage />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/admin/users"
-      element={
-        <ProtectedRoute requiredRole="admin">
-          <UsersPage />
-        </ProtectedRoute>
-      }
-    />
-  </Routes>
-);
+
+      <Route
+        path="/suppliers"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <Suppliers />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Admin Routes */}
+      <Route
+        path="/admin/dashboard"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/pending-suppliers"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <PendingSuppliersPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/active-suppliers"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <ActiveSuppliersPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/suppliers/:id"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <SupplierDetailsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <UsersPage />
+          </ProtectedRoute>
+        }
+      />
+      
+    </Routes>
+  );
 }

@@ -12,8 +12,11 @@ export const uploadFileAwsController = {
 
   getDownloadUrl : async (req, res) => {
   const { fileKey } = req.query;
+  console.log("fileKey",fileKey);
   try {
     const url = await uploadFileAwsService.createPresignedDownloadUrl(fileKey);
+    console.log(url);
+    
     res.json({ url });
   } catch (err) {
     res.status(500).json({ error: err.message });
