@@ -27,7 +27,7 @@ export default function Chat() {
 
     dispatch(
       fetchThreads({
-        id: user.role === "supplier" ? user.supplier._id : user._id,
+        id: user._id,
         role: user.role === "supplier" ? "supplier" : "user",
       })
     );
@@ -169,7 +169,7 @@ export default function Chat() {
 
               <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
                 {conversationMessages.length > 0 ? conversationMessages.map(msg => {
-                  const isCurrentUser = msg.from === user._id;
+                  const isCurrentUser = msg.from === user?._id;
                   return (
                     <div key={msg._id} className={`flex ${isCurrentUser ? "justify-end" : "justify-start"}`}>
                       <div className={`max-w-[70%] rounded-lg p-3 ${isCurrentUser ? "bg-background text-foreground" : "bg-primary/10"}`}>

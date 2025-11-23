@@ -2,6 +2,7 @@ import { countUnreadMessages } from "../repositories/message.repository.js";
 import * as repo from "../repositories/thread.repository.js";
 import { sendMessage } from "./message.service.js";
 import {SupplierService} from "./supplier.service.js";
+import {SupplierRepository} from "../repositories/suppliers.repositry.js";
 
 export async function getOrCreateThread({ requestId, userId, supplierId }) {
   const existingThread = await repo.getThreadByRequestId(requestId);
@@ -73,8 +74,8 @@ export async function serviceGetThreadsForUser(userId) {
 
 
 
-export async function serviceGetThreadsForSupplier(supplierId) {
-  console.log("serviceGetThreadsForSupplier supplierId: ", supplierId);
+export async function serviceGetThreadsForSupplier(supplierUserId) {
+  const supplierId = await SupplierRepository.getSupplierIdByUserId(supplierUserId);
   const threads = await repo.getThreadsForSupplier(supplierId);
   const enrichedThreads = threads.map(thread => ({
     _id: thread._id.toString(),

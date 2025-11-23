@@ -20,6 +20,20 @@ export const RequestService = {
       Supplier.findById(supplierId),
       User.findById(clientId)
     ]);
+    return event, supplier, client;
+
+  },
+  async getRequestsBySupplierUserId(userId) {
+    const requests = await RequestRepository.getBySupplierUserId(userId);
+    return requests;
+  },
+  
+ async createSupplierRequest  ({ eventId, supplierId, clientId, notesFromClient })  {
+  const [event, supplier, client] = await Promise.all([
+    Event.findById(eventId),
+    Supplier.findById(supplierId),
+    User.findById(clientId)
+  ]);
 
     if (!event) throw new AppError(404, 'Event not found');
     if (!supplier) throw new AppError(404, 'Supplier not found');
@@ -60,8 +74,10 @@ export const RequestService = {
 
     const updated = await RequestRepository.updateStatus(id, 'מאושר');
 
-    return updated;
-  },
+  const result = await RequestRepository.updateStatus(id, 'מאושר');
+  return result;
+  
+},
 
   async declineSupplierRequest(id, supplierId) {
     const request = await SupplierRequest.findById(id);
