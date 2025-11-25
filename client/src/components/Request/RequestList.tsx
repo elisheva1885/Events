@@ -235,7 +235,7 @@ export default function RequestList({ type }: RequestListProps) {
                           {request.eventId?.name || "אירוע"}
                         </CardTitle>
 
-                        <p className="mt-1 text-sm text-muted-foreground">
+                        <p className="mt-1 text-sm">
                           {resolvedMode === "supplier"
                             ? `מ: ${request.clientId?.name ||
                             request.clientId?.email ||

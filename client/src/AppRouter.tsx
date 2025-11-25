@@ -86,9 +86,7 @@ export default function AppRouter() {
 
   const handleRegister = () => {
     console.log("User registered");
-
-    // בדיקת תפקיד המשתמש והפניה לדשבורד המתאים
-    const userRole = getUserRole();
+     const userRole = getUserRole();
     if (userRole === 'admin') {
       navigate("/admin/dashboard");
     } else if (userRole === 'supplier') {

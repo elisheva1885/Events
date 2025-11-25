@@ -36,17 +36,9 @@
 // import Redis from 'ioredis';
 // import { sendNotification } from '../websocket/notification.socket.js';
 
-<<<<<<< HEAD
-// const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
-//   maxRetriesPerRequest: null,
-//   connectTimeout: 10000, // מגדיל את זמן החיבור
-//   retryStrategy: times => Math.min(times * 50, 2000) // ניסיון מחדש
-// });
-=======
 const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
   maxRetriesPerRequest: null
 })
->>>>>>> bc9106c40dca0c9f314f6cf3af80dfdacb45214d
 
 // // תור לניהול התראות
 
