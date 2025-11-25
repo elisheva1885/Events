@@ -32,13 +32,15 @@ export default function RequestList({ type }: RequestListProps) {
   const { requests, loading, error } = useSelector(
     (state: RootState) => state.requests
   );
+  console.log("in comp ", requests);
+  
   const [selectedTab, setSelectedTab] = useState("הכל");
   const [expandedRequest, setExpandedRequest] = useState<string | null>(null);
   const resolvedMode: "client" | "supplier" = type;
   const actionLoading = useSelector(
     (state: RootState) => state.requests.loading
   );
- const [showCreateContractDialog, setShowCreateContractDialog] =
+  const [showCreateContractDialog, setShowCreateContractDialog] =
     useState(false);
   const filteredRequests = useMemo(() => {
     if (!requests) return [];
@@ -235,16 +237,14 @@ export default function RequestList({ type }: RequestListProps) {
 
                         <p className="mt-1 text-sm">
                           {resolvedMode === "supplier"
-                            ? `מ: ${
-                                request.clientId?.name ||
-                                request.clientId?.email ||
-                                "לקוח"
-                              }`
-                            : `לספק: ${
-                                request.supplierId?.user?.name ||
-                                request.supplierId?.user?.email ||
-                                "—"
-                              }`}
+                            ? `מ: ${request.clientId?.name ||
+                            request.clientId?.email ||
+                            "לקוח"
+                            }`
+                            : `לספק: ${request.supplierId?.user?.name ||
+                            request.supplierId?.user?.email ||
+                            "—"
+                            }`}
                         </p>
                       </div>
 
@@ -263,8 +263,8 @@ export default function RequestList({ type }: RequestListProps) {
                         נשלח:{" "}
                         {request.createdAt
                           ? new Date(request.createdAt).toLocaleDateString(
-                              "he-IL"
-                            )
+                            "he-IL"
+                          )
                           : "—"}
                       </span>
                       <Button
@@ -304,7 +304,7 @@ export default function RequestList({ type }: RequestListProps) {
                         )}
 
                         <div className="flex gap-2">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" >
                             <MessageSquare className="w-4 h-4 ml-2" />
                             צפה בצ'אט
                           </Button>
@@ -374,12 +374,12 @@ export default function RequestList({ type }: RequestListProps) {
           )}
         </TabsContent>
       </Tabs>
-       <CreateContractDialog
-                      open={showCreateContractDialog}
-                      onOpenChange={(open) => {
-                        setShowCreateContractDialog(open);
-                      }}
-                    />
+      <CreateContractDialog
+        open={showCreateContractDialog}
+        onOpenChange={(open) => {
+          setShowCreateContractDialog(open);
+        }}
+      />
     </div>
   );
 }

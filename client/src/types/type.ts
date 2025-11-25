@@ -33,8 +33,8 @@ export interface User {
   name: string;
   email: string;
   phone: string;
-  role?: "client" | "supplier" | "admin";
-  social?: {
+ role?: "client" | "supplier" | "admin";
+   social?: {
     googleId?: string;
   };
   createdAt: Date;
