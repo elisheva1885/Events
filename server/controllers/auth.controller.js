@@ -21,37 +21,31 @@ export const login = asyncHandler(async (req, res) => {
   });
 });
 
-export const googleCallback = asyncHandler(async(req, res) => {
-    const profile = req.user; // Passport שם את הפרופיל
-    const { user, token } = await serv.googleLogin(profile);
+// export const googleCallback = asyncHandler(async(req, res) => {
+//     const profile = req.user; // Passport שם את הפרופיל
+//     const { user, token } = await serv.googleLogin(profile);
 
-    res.json({
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      }
-    });
+//     res.json({
+//       token,
+//       user: {
+//         id: user._id,
+//         name: user.name,
+//         email: user.email,
+//         role: user.role
+//       }
+//     });
  
-});
+// });
 
-// Google Auth - מקבל נתונים ישירות מהלקוח
+// // Google Auth - מקבל נתונים ישירות מהלקוח
 export const googleAuth = asyncHandler(async (req, res) => {
   const { email, name, googleId, picture } = req.body;
   
-  const { user, token } = await serv.googleAuth({ email, name, googleId, picture });
+  const { token } = await serv.googleAuth({ email, name, googleId, picture });
   
   res.json({
     success: true,
     message: "Google authentication successful",
-    token,
-    user: {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role
-    }
+    token
   });
 });
