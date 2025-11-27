@@ -21,7 +21,7 @@ import {
   Upload,
 } from "lucide-react";
 import type { AppDispatch, RootState } from "../../store";
-import { CreateContractDialog } from "../supplier/CreateContractDialog";
+import { CreateContractDialog } from "../ContractsAndPayments/CreateContractDialog";
 
 interface RequestListProps {
   type: "client" | "supplier";
@@ -235,7 +235,7 @@ export default function RequestList({ type }: RequestListProps) {
                           {request.eventId?.name || "אירוע"}
                         </CardTitle>
 
-                        <p className="mt-1 text-sm text-muted-foreground">
+                        <p className="mt-1 text-sm">
                           {resolvedMode === "supplier"
                             ? `מ: ${request.clientId?.name ||
                             request.clientId?.email ||
