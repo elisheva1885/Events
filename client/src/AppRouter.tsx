@@ -14,7 +14,6 @@ import { SupplierDetailsPage } from "./pages/admin/SupplierDetailsPage";
 import { UsersPage } from "./pages/admin/UsersPage";
 import { getUserRole } from "./services/auth";
 import Requests from "./pages/Request";
-import { getUserRole } from "./api/auth";
 import type { AppRoute } from "./types/AppRouter";
 import SupplierDashboard from "./pages/Supplier/SupplierDashboard";
 import { RequestPage } from "./pages/RequestPage";

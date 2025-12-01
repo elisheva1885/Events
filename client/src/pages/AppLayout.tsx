@@ -4,7 +4,8 @@ import React, {
   useState,
   useCallback,
 } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+
 import {
   Sidebar,
   SidebarContent,
@@ -19,27 +20,31 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "../components/ui/sidebar";
+
 import { LogOut, Bell, X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover";
 import { Separator } from "../components/ui/separator";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
+import { ScrollArea } from "../components/ui/scroll-area";
 
 import { initSocket } from "../services/socket";
-import type { AppDispatch, RootState } from "../store";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  fetchNotifications,
-  markNotificationAsRead, // 👉 צריך להוסיף ב-slice אם אין
-} from "../store/notificationsSlice";
-import NotificationsList from "./NotificationsList";
-import { logout } from "../services/auth";
+import { fetchNotifications, markNotificationAsRead } from "../store/notificationsSlice";
 import { fetchUser } from "../store/authSlice";
+
+import { logout } from "../services/auth";
+
+import type { AppDispatch, RootState } from "../store";
 import type { AppRoute } from "../types/AppRouter";
 import type { Notification } from "../types/type";
-import { formatRelativeTime, getNotificationColor, getNotificationIcon } from "../Utils/NotificationUtils";
-import { ScrollArea } from "../components/ui/scroll-area";
+
+import {
+  formatRelativeTime,
+  getNotificationColor,
+  getNotificationIcon,
+} from "../Utils/NotificationUtils";
 
 export default function AppLayout({
   navigationItems,
@@ -50,145 +55,81 @@ export default function AppLayout({
 }) {
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
-  const [navigetNotification,setNavigetNotification]=useState('')
+  const location = useLocation();
+
   const user = useSelector((state: RootState) => state.auth.user);
-  const { notifications } = useSelector(
-    (state: RootState) => state.notifications
-  ); // אם אצלך זה בשם אחר – תשני פה
+  const { notifications } = useSelector((state: RootState) => state.notifications);
 
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [navigetNotification, setNavigetNotification] = useState("");
 
-  // --- USER ---
+  /** --- USER LOAD --- */
   useEffect(() => {
     dispatch(fetchUser());
-    if(user?.role==='supplier')
-      setNavigetNotification("/supplier/notifications")
-    else
-      setNavigetNotification("/notifications")
   }, [dispatch]);
 
-  // --- SOCKET + טעינת התראות ראשונית ---
+  /** קביעת נתיב בסיס להתראות */
+  useEffect(() => {
+    if (user) {
+      setNavigetNotification(
+        user.role === "supplier"
+          ? "/supplier/notifications"
+          : "/notifications"
+      );
+    }
+  }, [user]);
+
+  /** --- SOCKET + INITIAL NOTIFICATION FETCH --- */
   useEffect(() => {
     if (user?._id) {
       const socket = initSocket(user._id, dispatch);
       dispatch(fetchNotifications());
-      // אם את רוצה, יכולה להחזיר socket.disconnect ב-cleanup
+      return () => socket?.disconnect?.();
     }
-  }, [user, dispatch]);
+  }, [user?._id, dispatch]);
 
+  /** LOGOUT */
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
+  /** USER INITIALS */
   const userInitials = useMemo(() => {
-    if (!user) return "U";
-    if (!user.name) return "U";
+    if (!user?.name) return "U";
     const parts = user.name.split(" ");
-    return parts.length > 1 ? `${parts[0][0]}${parts[1][0]}` : parts[0][0];
+    return parts.length > 1
+      ? `${parts[0][0]}${parts[1][0]}`
+      : parts[0][0];
   }, [user?.name]);
 
-  {
-    // return (
-    //   <div className="min-h-screen flex items-center justify-center bg-background" style={{ direction: "rtl" }}>
-    //     <div className="text-center">
-    //       <h1 className="text-2xl font-bold mb-4">ניהול אירועים</h1>
-    //       <p className="text-muted-foreground mb-6">אנא התחבר כדי להמשיך</p>
-    //       <Link to="/login">
-    //         <button className="bg-primary text-primary-foreground px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors">
-    //           התחבר
-    //         </button>
-    //       </Link>
-    //     </div>
-    //   </div>
-    // );
-
-  return (<>
-    <SidebarProvider style={{ direction: "rtl" } as React.CSSProperties}>
-      <Sidebar side="right">
-        <SidebarHeader>
-          <div className="flex flex-col items-center justify-start p-0 m-0">
-            <img
-              src="/src/assets/logo.png"
-              alt="Évenu לוגו"
-              className="h-28 w-auto mb-2 mt-2"
-              style={{ maxWidth: '90%', display: 'block' }}
-            />
-            <div className="w-full border-b border-[#e3e3e6] mt-2"></div>
-          </div>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {navigationItems.map((item) => {
-                  const isActive = location.pathname.startsWith(item.path);
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild isActive={isActive}>
-                        <Link to={item.path} className="flex items-center gap-2">
-                          <item.icon/>
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-        <SidebarFooter>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <div className="flex items-center gap-3 px-4 py-3 border-t">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={ ""} alt={user?.name || ""} />
-                  <AvatarFallback>{userInitials}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{user?.name || user?.email}</p>
-                  <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-  // ===== התראות מה-STORE =====
-
+  /** UNREAD COUNT */
   const unreadCount = useMemo(
     () => notifications?.length || 0,
     [notifications]
   );
 
+  /** SORTED FIVE RECENT NOTIFICATIONS */
   const recentNotifications = useMemo(() => {
     if (!notifications) return [];
     return [...notifications]
-      .sort((a: Notification, b: Notification) => {
-        if (!a.payload.time) return 1;
-        if (!b.payload.time) return -1;
-        return (
-          new Date(b.payload.time).getTime() - new Date(a.payload.time).getTime()
-        );
-      })
+      .sort((a: Notification, b: Notification) =>
+        new Date(b.payload.time).getTime() -
+        new Date(a.payload.time).getTime()
+      )
       .slice(0, 5);
   }, [notifications]);
 
-  const hasNewNotifications = unreadCount > 0;
-
+  /** CLICK ON NOTIFICATION */
   const handleNotificationClick = useCallback(
-    async (notification: Notification) => {
-      // סימון כנקרא
-    
-        // אם אצלך ה-id הוא _id / id – תתאימי
-        dispatch(markNotificationAsRead(notification.id));
-      
-
+    (notification: Notification) => {
+      dispatch(markNotificationAsRead(notification.id));
       setIsNotificationsOpen(false);
-
-      // if (notification.actionUrl) {-cool feature
-      //   navigate(notification.actionUrl);
-      // }
     },
-    [dispatch, navigate]
+    [dispatch]
   );
 
-  // =======================
+  /** ============================= JSX ============================= */
 
   return (
     <>
@@ -196,9 +137,7 @@ export default function AppLayout({
         <Sidebar side="right">
           <SidebarHeader>
             <div className="px-4 py-6 border-b">
-              <h1 className="text-xl font-bold text-primary">
-                ניהול אירועים
-              </h1>
+              <h1 className="text-xl font-bold text-primary">ניהול אירועים</h1>
             </div>
           </SidebarHeader>
 
@@ -211,10 +150,7 @@ export default function AppLayout({
                     return (
                       <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton asChild isActive={isActive}>
-                          <Link
-                            to={item.path}
-                            className="flex items-center gap-2"
-                          >
+                          <Link to={item.path} className="flex items-center gap-2">
                             <item.icon />
                             <span>{item.title}</span>
                           </Link>
@@ -235,16 +171,13 @@ export default function AppLayout({
                     <AvatarImage src={""} alt={user?.name || ""} />
                     <AvatarFallback>{userInitials}</AvatarFallback>
                   </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {user?.name || user?.email}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {user?.email}
-                    </p>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{user?.name || user?.email}</p>
+                    <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
                   </div>
                 </div>
               </SidebarMenuItem>
+
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={handleLogout}>
                   <LogOut className="w-5 h-5" />
@@ -256,29 +189,20 @@ export default function AppLayout({
         </Sidebar>
 
         <SidebarInset>
-          {/* טופ בר – הוספתי פה את הפעמון */}
+          {/* טופבר */}
           <div className="sticky top-0 z-10 bg-background border-b px-4 py-3 flex items-center gap-2">
             <SidebarTrigger />
 
-            {/* מרווח ימינה, הפעמון בצד שמאל של הטופבר */}
             <div className="ml-auto">
-              <Popover
-                open={isNotificationsOpen}
-                onOpenChange={setIsNotificationsOpen}
-              >
+              <Popover open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
                 <PopoverTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className={`relative ${
-                      hasNewNotifications ? "animate-pulse" : ""
-                    }`}
-                  >
+                  <Button variant="ghost" size="icon" className="relative">
                     <Bell className="h-5 w-5 text-primary" />
+
                     {unreadCount > 0 && (
                       <Badge
                         variant="destructive"
-                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs rounded-full"
+                        className="absolute -top-1 -right-1 h-5 w-5 text-xs flex items-center justify-center rounded-full"
                       >
                         {unreadCount}
                       </Badge>
@@ -302,60 +226,39 @@ export default function AppLayout({
                   <ScrollArea className="max-h-[360px]">
                     {recentNotifications.length > 0 ? (
                       <div className="p-2 space-y-1">
-                        {recentNotifications.map(
-                          (notification: Notification, index: number) => {
-                            const Icon = getNotificationIcon(
-                              notification.type
-                            );
-                            const iconColor = getNotificationColor(
-                              notification.type
-                            );
+                        {recentNotifications.map((notification, index) => {
+                          const Icon = getNotificationIcon(notification.type);
+                          const colorClass = getNotificationColor(notification.type);
 
-                            return (
-                              <React.Fragment
-                                key={notification.id}
+                          return (
+                            <React.Fragment key={notification.id}>
+                              <div
+                                className="p-3 rounded-lg bg-slate-50 hover:bg-slate-100 cursor-pointer"
+                                onClick={() => handleNotificationClick(notification)}
                               >
-                                <div
-                                  className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                                      "bg-slate-50 hover:bg-slate-100"
-                                  }`}
-                                  onClick={() =>
-                                    handleNotificationClick(notification)
-                                  }
-                                >
-                                  <div className="flex items-start gap-3">
-                                    <div
-                                      className={`p-2 rounded-full ${iconColor}`}
-                                    >
-                                      <Icon className="h-4 w-4" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                      <div className="flex items-center gap-2 mb-1">
-                                        <p className="font-medium text-sm truncate">
-                                          {notification.type}
-                                        </p>
-                                        <div className="w-2 h-2 bg-destructive rounded-full flex-shrink-0" />
-                                        
-                                      </div>
-                                      <p className="text-xs text-muted-foreground line-clamp-2 mb-1">
-                                        {notification.payload.note}
-                                      </p>
-                                      <p className="text-xs text-muted-foreground">
-                                        {formatRelativeTime(
-                                          notification.payload.time
-                                        )}
-                                      </p>
-                                    </div>
+                                <div className="flex items-start gap-3">
+                                  <div className={`p-2 rounded-full ${colorClass}`}>
+                                    <Icon className="h-4 w-4" />
+                                  </div>
+
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-sm truncate">{notification.type}</p>
+                                    <p className="text-xs text-muted-foreground line-clamp-2">
+                                      {notification.payload.note}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {formatRelativeTime(notification.payload.time)}
+                                    </p>
                                   </div>
                                 </div>
-                                {index <
-                                  recentNotifications.length - 1 && (
-                                  <Separator className="my-1" />
-                                )}
-                              </React.Fragment>
-                            );
-                          }
-                        )}
+                              </div>
+
+                              {index < recentNotifications.length - 1 && (
+                                <Separator className="my-1" />
+                              )}
+                            </React.Fragment>
+                          );
+                        })}
                       </div>
                     ) : (
                       <div className="p-8 text-center text-muted-foreground">
@@ -386,9 +289,6 @@ export default function AppLayout({
           <main className="p-6">{children}</main>
         </SidebarInset>
       </SidebarProvider>
-
-      {/* אם יש לך קומפוננטת עמוד התראות מלאה – את יכולה להשאיר / להסיר לפי הצורך */}
-      {/* <NotificationsList /> */}
     </>
   );
 }
