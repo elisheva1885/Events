@@ -21,7 +21,7 @@ export const SupplierService = {
   },
   async getSupplier(id) {
     const supplier = await SupplierRepository.findById(id);
-    if (!supplier) throw new AppError(404, "Supplier not found");
+    if (!supplier) throw new AppError(404, "ספק לא נמצא");
     return supplier;
   },
   async updateSupplierStatus(id, status) {
@@ -51,9 +51,11 @@ export const SupplierService = {
  
   async updateSupplierMedia(id,profileImage, media) {
     const supplierId= await SupplierRepository.getSupplierIdByUserId(id);
-    console.log(id,supplierId);
+    if (!supplierId) {
+        throw new AppError(404, "ספק לא נמצא");
+      }
     const supplier = await SupplierRepository.updateSupplierMedia(supplierId,profileImage, media);
-    if (!supplier) throw new AppError(404, "Supplier not found");
+    if (!supplier) throw new AppError(404, "ספק לא נמצא");
     return supplier;
   },
 };

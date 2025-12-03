@@ -1,7 +1,7 @@
-import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
-import type { Event } from "../types/type";
-import api from '../services/axios';
 
+import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
+import type { Event } from '../types/type';
+import api from '../services/axios';
 
 export interface EventState {
   eventsList: Event[];
@@ -21,96 +21,85 @@ const initialState: EventState = {
   types: [],
 };
 
-type EventsResponse = {
-  success: boolean;
-  events: Event[];
-  pagination: {
-    total: number;
-    page: number;
-    limit: number;
-    pages: number;
-  };
-};
-
 export type EventType = string;
 
 // --- Thunks ---
-// Get all events
+// 🔹 כל האירועים (בלי פגינציה)
 export const fetchEvents = createAsyncThunk<Event[], void>(
-  "events/fetchAll",
+  'events/fetchAll',
   async () => {
-    const { data } = await api.get<EventsResponse>("/events");
-    console.log("events", data);
-    return data.events;
-  }
-);
-
-export const fetchEventTypes = createAsyncThunk<EventType[], void>(
-  "events/fetchTypes",
-  async () => {
-    const { data } = await api.get<{ success: boolean; data: EventType[] }>("/events/types");
-    return data.data; // כאן אנחנו שולפים את המערך מתוך data
-  }
-);
-
-
-
-// Get single event by ID
-export const fetchEventById = createAsyncThunk<Event, string>(
-  "events/fetchById",
-  async (id) => {
-    const { data } = await api.get<{ event: Event }>(`/events/${id}`);
-    return data.event;
-  }
-);
-
-// Create event
-export const createEvent = createAsyncThunk<Event, Event>(
-  "events/create",
-  async (event) => {
-    const { data } = await api.post<{ success: boolean; data: Event }>("/events", event);
-    console.log("data", data);
+    const { data } = await api.get<{ success: boolean; data: Event[] }>('/events');
     return data.data;
   }
 );
 
-// Update event
-// export const updateEvent = createAsyncThunk<Event, { id: string; data: Partial<Event> }>(
-//   "events/update",
-//   async ({ id, data }) => {
-//         console.log("UPDATE THUNK STARTED", id, data);  // 👈 בדיקה
+// 🔹 רק אירועים רלוונטיים
+export const fetchRelevantEvents = createAsyncThunk<Event[], void>(
+  'events/fetchRelevant',
+  async () => {
+    const { data } = await api.get<{ success: boolean; data: Event[] }>(
+      '/events/relevant'
+    );
+    return data.data;
+  }
+);
 
-//     const { data: response } = await api.patch<{ event: Event }>(`/events/${id}`, data);
-//     return response.event;
-//   }
-// );
+// 🔹 סוגי אירועים
+export const fetchEventTypes = createAsyncThunk<EventType[], void>(
+  'events/fetchTypes',
+  async () => {
+    const { data } = await api.get<{ success: boolean; data: EventType[] }>(
+      '/events/types'
+    );
+    return data.data;
+  }
+);
 
+// 🔹 אירוע בודד לפי ID
+export const fetchEventById = createAsyncThunk<Event, string>(
+  'events/fetchById',
+  async (id) => {
+    const { data } = await api.get<{ success: boolean; data: Event }>(`/events/${id}`);
+    return data.data;
+  }
+);
+
+// 🔹 יצירת אירוע
+export const createEvent = createAsyncThunk<Event, Event>(
+  'events/create',
+  async (event) => {
+    const { data } = await api.post<{ success: boolean; data: Event }>(
+      '/events',
+      event
+    );
+    console.log('data', data);
+    return data.data;
+  }
+);
+
+// 🔹 עדכון אירוע
 export const updateEvent = createAsyncThunk<
   Event,
   { id: string; data: Partial<Event> },
   { rejectValue: string }
->(
-  "events/update",
-  async ({ id, data }, { rejectWithValue }) => {
-    try {
-      const res = await api.patch(`/events/${id}`, data);
+>('events/update', async ({ id, data }, { rejectWithValue }) => {
+  try {
+    const res = await api.patch<{ success: boolean; data: Event }>(
+      `/events/${id}`,
+      data
+    );
 
-      console.log("🔍 SERVER RAW RESPONSE:", res.data); 
+    console.log('🔍 SERVER RAW RESPONSE:', res.data);
 
-
-      return res.data.data; // ← אולי צריך לשנות
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || "Error updating");
-    }
+    return res.data.data;
+  } catch (err: any) {
+    return rejectWithValue(err.response?.data?.message || 'Error updating');
   }
-);
+});
 
-
-
-
-// Delete event
+// 🔹 מחיקת אירוע
 export const deleteEvent = createAsyncThunk<string, string>(
-  "events/delete",
+  'events/delete',
   async (id) => {
     await api.delete(`/events/${id}`);
     return id;
@@ -118,7 +107,7 @@ export const deleteEvent = createAsyncThunk<string, string>(
 );
 
 const eventsSlice = createSlice({
-  name: "events",
+  name: 'events',
   initialState,
   reducers: {
     clearSelectedEvent: (state) => {
@@ -127,8 +116,11 @@ const eventsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch all
-      .addCase(fetchEvents.pending, (state) => { state.loadingList = true; })
+      // ---- כל האירועים ----
+      .addCase(fetchEvents.pending, (state) => {
+        state.loadingList = true;
+        state.error = undefined;
+      })
       .addCase(fetchEvents.fulfilled, (state, action: PayloadAction<Event[]>) => {
         state.loadingList = false;
         state.eventsList = action.payload;
@@ -138,8 +130,28 @@ const eventsSlice = createSlice({
         state.error = action.error.message;
       })
 
-      // Fetch one
-      .addCase(fetchEventById.pending, (state) => { state.loadingOne = true; })
+      // ---- רלוונטיים ----
+      .addCase(fetchRelevantEvents.pending, (state) => {
+        state.loadingList = true;
+        state.error = undefined;
+      })
+      .addCase(
+        fetchRelevantEvents.fulfilled,
+        (state, action: PayloadAction<Event[]>) => {
+          state.loadingList = false;
+          state.eventsList = action.payload;
+        }
+      )
+      .addCase(fetchRelevantEvents.rejected, (state, action) => {
+        state.loadingList = false;
+        state.error = action.error.message;
+      })
+
+      // ---- אחד ----
+      .addCase(fetchEventById.pending, (state) => {
+        state.loadingOne = true;
+        state.error = undefined;
+      })
       .addCase(fetchEventById.fulfilled, (state, action: PayloadAction<Event>) => {
         state.loadingOne = false;
         state.selectedEvent = action.payload;
@@ -148,38 +160,51 @@ const eventsSlice = createSlice({
         state.loadingOne = false;
         state.error = action.error.message;
       })
+
+      // ---- סוגי אירועים ----
       .addCase(fetchEventTypes.pending, (state) => {
         state.loadingList = true;
       })
-      .addCase(fetchEventTypes.fulfilled, (state, action: PayloadAction<EventType[]>) => {
-        state.loadingList = false;
-        state.types = action.payload;
-      })
+      .addCase(
+        fetchEventTypes.fulfilled,
+        (state, action: PayloadAction<EventType[]>) => {
+          state.loadingList = false;
+          state.types = action.payload;
+        }
+      )
       .addCase(fetchEventTypes.rejected, (state, action) => {
         state.loadingList = false;
         state.error = action.error.message;
       })
-      // Create
+
+      // ---- יצירה ----
       .addCase(createEvent.fulfilled, (state, action: PayloadAction<Event>) => {
         state.eventsList.push(action.payload);
       })
 
-      // Update
+      // ---- עדכון ----
       .addCase(updateEvent.fulfilled, (state, action: PayloadAction<Event>) => {
-        console.log("UPDATE FULFILLED PAYLOAD:", action.payload);
-        const idx = state.eventsList.findIndex(e => e._id === action.payload._id);
+        console.log('UPDATE FULFILLED PAYLOAD:', action.payload);
+        const idx = state.eventsList.findIndex(
+          (e) => e._id === action.payload._id
+        );
         if (idx !== -1) state.eventsList[idx] = action.payload;
-        if (state.selectedEvent?._id === action.payload._id) state.selectedEvent = action.payload;
+        if (state.selectedEvent?._id === action.payload._id) {
+          state.selectedEvent = action.payload;
+        }
       })
 
-      // Delete
+      // ---- מחיקה ----
       .addCase(deleteEvent.fulfilled, (state, action: PayloadAction<string>) => {
-        state.eventsList = state.eventsList.filter(e => e._id !== action.payload);
-        if (state.selectedEvent?._id === action.payload) state.selectedEvent = null;
+        state.eventsList = state.eventsList.filter(
+          (e) => e._id !== action.payload
+        );
+        if (state.selectedEvent?._id === action.payload) {
+          state.selectedEvent = null;
+        }
       });
-  }
+  },
 });
 
 export const { clearSelectedEvent } = eventsSlice.actions;
-
 export default eventsSlice.reducer;

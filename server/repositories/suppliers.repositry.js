@@ -18,7 +18,7 @@ export const SupplierRepository = {
     ).populate("category", "label");
 
     if (!updatedSupplier) {
-      throw new Error("Supplier not found");
+      throw new Error("ספק לא נמצא");
     }
 
     return updatedSupplier;
@@ -88,6 +88,14 @@ export const SupplierRepository = {
   async getSupplierIdByUserId(userId) {
     const supplier = await Supplier.findOne({ user: userId }).lean();
     return supplier?._id || null;
+  },
+  async getSupplierByUserId(userId) {
+    const supplier = await Supplier.findOne({ user: userId }).lean();
+    return supplier || null;
+  },
+  async getSupplierById(_id) {
+    const supplier = await Supplier.findOne({_id}).lean();    
+    return supplier || null;
   },
   async findById(id) {
     return Supplier.findById(id)

@@ -8,6 +8,7 @@ import chatReducer from './chatSlice'
 import requestReducer from './requestSlice'
 import contractsReducer  from './contractsSlice'
 import paymentsReducer from './paymentsSlice'
+import budgetReducer from './budgetSlice'
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -18,7 +19,8 @@ export const store = configureStore({
     chat: chatReducer,
     requests: requestReducer,
     contracts:contractsReducer,
-    payments: paymentsReducer
+    payments: paymentsReducer,
+    budget: budgetReducer
 
   },
 })

@@ -31,15 +31,15 @@ import type { AppDispatch, RootState } from "../store";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchNotifications,
-  markNotificationAsRead, // 👉 צריך להוסיף ב-slice אם אין
+  markNotificationAsRead, 
 } from "../store/notificationsSlice";
-import NotificationsList from "./NotificationsList";
 import { logout } from "../services/auth";
 import { fetchUser } from "../store/authSlice";
 import type { AppRoute } from "../types/AppRouter";
-import type { Notification } from "../types/type";
+import type { Notification } from "../types/Notification";
 import { formatRelativeTime, getNotificationColor, getNotificationIcon } from "../Utils/NotificationUtils";
 import { ScrollArea } from "../components/ui/scroll-area";
+import { Toaster } from "sonner";
 
 export default function AppLayout({
   navigationItems,
@@ -54,25 +54,24 @@ export default function AppLayout({
   const user = useSelector((state: RootState) => state.auth.user);
   const { notifications } = useSelector(
     (state: RootState) => state.notifications
-  ); // אם אצלך זה בשם אחר – תשני פה
+  ); 
 
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
-  // --- USER ---
   useEffect(() => {
     dispatch(fetchUser());
+  }, [dispatch]);
+
+  useEffect(() => {
     if(user?.role==='supplier')
       setNavigetNotification("/supplier/notifications")
     else
       setNavigetNotification("/notifications")
-  }, [dispatch]);
-
-  // --- SOCKET + טעינת התראות ראשונית ---
+  }, [user])
   useEffect(() => {
     if (user?._id) {
       const socket = initSocket(user._id, dispatch);
       dispatch(fetchNotifications());
-      // אם את רוצה, יכולה להחזיר socket.disconnect ב-cleanup
     }
   }, [user, dispatch]);
 
@@ -86,9 +85,8 @@ export default function AppLayout({
     if (!user.name) return "U";
     const parts = user.name.split(" ");
     return parts.length > 1 ? `${parts[0][0]}${parts[1][0]}` : parts[0][0];
-  }, [user?.name]);
+  }, [user]);
 
-  // ===== התראות מה-STORE =====
 
   const unreadCount = useMemo(
     () => notifications?.length || 0,
@@ -112,22 +110,12 @@ export default function AppLayout({
 
   const handleNotificationClick = useCallback(
     async (notification: Notification) => {
-      // סימון כנקרא
-    
-        // אם אצלך ה-id הוא _id / id – תתאימי
         dispatch(markNotificationAsRead(notification.id));
-      
-
       setIsNotificationsOpen(false);
-
-      // if (notification.actionUrl) {-cool feature
-      //   navigate(notification.actionUrl);
-      // }
     },
-    [dispatch, navigate]
+    [dispatch]
   );
 
-  // =======================
 
   return (
     <>
@@ -325,9 +313,9 @@ export default function AppLayout({
           <main className="p-6">{children}</main>
         </SidebarInset>
       </SidebarProvider>
+      <Toaster />
 
-      {/* אם יש לך קומפוננטת עמוד התראות מלאה – את יכולה להשאיר / להסיר לפי הצורך */}
-      {/* <NotificationsList /> */}
+      
     </>
   );
 }
