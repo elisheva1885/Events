@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
     Dialog,
     DialogContent,
@@ -10,12 +10,16 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Button } from "../ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Command, CommandInput, CommandList, CommandItem, CommandEmpty, CommandGroup } from "../ui/command";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { createEvent, fetchEventTypes } from "../../store/eventsSlice";
 import type { AppDispatch, RootState } from "../../store";
 import { toast } from "sonner";
+import { cn } from "../../lib/utils";
+import { useCitiesList } from "../../hooks/useCitiesList";
 
-// Wrapper עבור Input עם מסגרת זהובה בעת ריחוף
 const GoldInput = (props: any) => (
     <Input
         {...props}
@@ -26,11 +30,13 @@ const GoldInput = (props: any) => (
 interface EventFormDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    initialData?: any; // אם מדובר בעריכה
 }
 
-export const EventFormDialog = ({ open, onOpenChange }: EventFormDialogProps) => {
+export const EventFormDialog = ({ open, onOpenChange, initialData }: EventFormDialogProps) => {
     const dispatch = useDispatch<AppDispatch>();
-    const { types: eventTypes, loadingList } = useSelector((state: RootState) => state.events);
+    const { types: eventTypes, loadingList, loadingOne } = useSelector((state: RootState) => state.events);
+    const cities = useCitiesList();
 
     const [formData, setFormData] = useState({
         name: "",
@@ -43,13 +49,35 @@ export const EventFormDialog = ({ open, onOpenChange }: EventFormDialogProps) =>
 
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [cityOpen, setCityOpen] = useState(false);
+    const [citySearch, setCitySearch] = useState("");
 
     // טען סוגי אירועים
     useEffect(() => {
         dispatch(fetchEventTypes());
     }, [dispatch]);
 
-    // פונקציית בדיקות ידניות
+    // מילוי טופס אם מדובר בעריכה
+    useEffect(() => {
+        if (initialData) {
+            setFormData({
+                name: initialData.name || "",
+                type: initialData.type || "",
+                date: initialData.date ? initialData.date.split("T")[0] : "",
+                locationRegion: initialData.locationRegion || "",
+                budget: initialData.budget?.toString() || "",
+                estimatedGuests: initialData.estimatedGuests?.toString() || "",
+            });
+        }
+    }, [initialData]);
+
+    // סינון ערים לפי חיפוש
+    const filteredCities = useMemo(() => {
+        if (!citySearch) return cities.slice(0, 50);
+        return cities.filter(city => city.includes(citySearch)).slice(0, 50);
+    }, [cities, citySearch]);
+
+    // ולידציה
     const validate = (): boolean => {
         const newErrors: Record<string, string> = {};
 
@@ -83,149 +111,131 @@ export const EventFormDialog = ({ open, onOpenChange }: EventFormDialogProps) =>
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleChange = (field: string, value: any) => {
-        setFormData({ ...formData, [field]: value });
-        setErrors({ ...errors, [field]: "" });
-    };
-
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!validate()) return;
 
         setIsSubmitting(true);
+
+        const payload = {
+            name: formData.name,
+            type: formData.type,
+            date: formData.date,
+            locationRegion: formData.locationRegion,
+            budget: formData.budget ? parseFloat(formData.budget) : undefined,
+            estimatedGuests: formData.estimatedGuests ? parseInt(formData.estimatedGuests) : undefined,
+        };
+
         try {
-            await dispatch(
-                createEvent({
-                    ...formData,
-                    budget: formData.budget ? parseFloat(formData.budget) : undefined,
-                    estimatedGuests: formData.estimatedGuests ? parseInt(formData.estimatedGuests) : undefined,
-                })
-            ).unwrap();
 
-            toast.success("האירוע נוצר בהצלחה!");
-
+            await dispatch(createEvent(payload)).unwrap();
+            toast.success(`האירוע  נוצר הצלחה!`);
             onOpenChange(false);
-        }  catch (err: any) {
-    console.error("Error saving event:", err);
+        } catch (err: any) {
+            console.error("Error saving event:", err);
+            const errorText = String(err);
 
-    const errorText = String(err);
+            if (errorText.includes("Error creating event") || errorText.includes("Network") || errorText.includes("ERR_CONNECTION_REFUSED")) {
+                toast.error("השרת אינו זמין כרגע");
+                onOpenChange(false); // סגירת דיאלוג במקרה של קריסה/שגיאה ברשת
+                return;
+            }
 
-    // אם כל חריגה מהשרת/רשת, סגור את הדיאלוג
-    if (errorText.includes("Error creating event") || 
-        errorText.includes("Network") || 
-        errorText.includes("ERR_CONNECTION_REFUSED")) 
-    {
-        toast.error("השרת אינו זמין כרגע");
-        onOpenChange(false); // סגירת הדיאלוג
-        return;
-    }
+            toast.error("אירעה שגיאה בעת שמירת האירוע");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
-    // אחרת, שגיאה רגילה - נשאר בטופס
-    toast.error("אירעה שגיאה בעת שמירת האירוע");
-}
-    finally {
-        setIsSubmitting(false);
-    }
-};
+    const isLoading = isSubmitting || loadingList || loadingOne;
 
-const isLoading = isSubmitting || loadingList;
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="sm:max-w-[500px] bg-white dark:bg-gray-800" style={{ direction: "rtl" }}>
+                <DialogHeader>
+                    <DialogTitle>{initialData ? "עריכת אירוע" : "יצירת אירוע חדש"}</DialogTitle>
+                </DialogHeader>
 
-return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[500px] bg-white dark:bg-gray-800" style={{ direction: "rtl" }}>
-            <DialogHeader>
-                <DialogTitle>יצירת אירוע חדש</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                    <Label htmlFor="eventName">שם האירוע</Label>
-                    <GoldInput
-                        id="eventName"
-                        value={formData.name}
-                        onChange={(e) => handleChange("name", e.target.value)}
-                        required
-                    />
-                    {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
-                </div>
-
-                <div className="space-y-2">
-                    <Label htmlFor="eventType">סוג אירוע</Label>
-                    <Select
-                        value={formData.type}
-                        onValueChange={(value) => handleChange("type", value)}
-                        required
-                    >
-                        <SelectTrigger>
-                            <SelectValue placeholder="בחר סוג אירוע" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {loadingList ? (
-                                <SelectItem value="">טוען...</SelectItem>
-                            ) : (
-                                eventTypes?.map((type) => (
-                                    <SelectItem key={type} value={type}>
-                                        {type}
-                                    </SelectItem>
-                                ))
-                            )}
-                        </SelectContent>
-                    </Select>
-                    {errors.type && <p className="text-red-500 text-sm">{errors.type}</p>}
-                </div>
-
-                <div className="space-y-2">
-                    <Label htmlFor="eventDate">תאריך האירוע</Label>
-                    <GoldInput
-                        id="eventDate"
-                        type="date"
-                        value={formData.date}
-                        onChange={(e) => handleChange("date", e.target.value)}
-                        required
-                    />
-                    {errors.date && <p className="text-red-500 text-sm">{errors.date}</p>}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* שם האירוע */}
                     <div className="space-y-2">
-                        <Label htmlFor="guestCount">מספר אורחים</Label>
-                        <GoldInput
-                            id="guestCount"
-                            type="number"
-                            value={formData.estimatedGuests}
-                            onChange={(e) => handleChange("estimatedGuests", e.target.value)}
-                        />
-                        {errors.estimatedGuests && <p className="text-red-500 text-sm">{errors.estimatedGuests}</p>}
+                        <Label>שם האירוע</Label>
+                        <GoldInput value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+                        {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
                     </div>
 
+                    {/* סוג אירוע */}
                     <div className="space-y-2">
-                        <Label htmlFor="budget">תקציב (₪)</Label>
-                        <GoldInput
-                            id="budget"
-                            type="number"
-                            value={formData.budget}
-                            onChange={(e) => handleChange("budget", e.target.value)}
-                        />
-                        {errors.budget && <p className="text-red-500 text-sm">{errors.budget}</p>}
+                        <Label>סוג אירוע</Label>
+                        <Select value={formData.type} onValueChange={(val) => setFormData({ ...formData, type: val })}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="בחר סוג אירוע" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {loadingList ? <SelectItem value="none">טוען...</SelectItem> : eventTypes.map((type) => <SelectItem key={type} value={type}>{type}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                        {errors.type && <p className="text-red-500 text-sm">{errors.type}</p>}
                     </div>
-                </div>
 
-                <div className="space-y-2">
-                    <Label htmlFor="location">מיקום</Label>
-                    <GoldInput
-                        id="location"
-                        value={formData.locationRegion}
-                        onChange={(e) => handleChange("locationRegion", e.target.value)}
-                    />
-                    {errors.locationRegion && <p className="text-red-500 text-sm">{errors.locationRegion}</p>}
-                </div>
+                    {/* תאריך */}
+                    <div className="space-y-2">
+                        <Label>תאריך האירוע</Label>
+                        <GoldInput type="date" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} />
+                        {errors.date && <p className="text-red-500 text-sm">{errors.date}</p>}
+                    </div>
 
-                <DialogFooter>
-                    <Button type="submit" disabled={isLoading}>
-                        {isLoading ? "שומר..." : "שמור"}
-                    </Button>
-                </DialogFooter>
-            </form>
-        </DialogContent>
-    </Dialog>
-);
+                    {/* אורחים ותקציב */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label>מספר אורחים</Label>
+                            <GoldInput type="number" value={formData.estimatedGuests} onChange={(e) => setFormData({ ...formData, estimatedGuests: e.target.value })} />
+                            {errors.estimatedGuests && <p className="text-red-500 text-sm">{errors.estimatedGuests}</p>}
+                        </div>
+                        <div className="space-y-2">
+                            <Label>תקציב (₪)</Label>
+                            <GoldInput type="number" value={formData.budget} onChange={(e) => setFormData({ ...formData, budget: e.target.value })} />
+                            {errors.budget && <p className="text-red-500 text-sm">{errors.budget}</p>}
+                        </div>
+                    </div>
+
+                    {/* מיקום */}
+                    <div className="space-y-2">
+                        <Label>מיקום (עיר)</Label>
+                        <Popover open={cityOpen} onOpenChange={setCityOpen}>
+                            <PopoverTrigger asChild>
+                                <Button variant="outline" role="combobox" className="w-full justify-between border-gray-300 hover:border-yellow-500">
+                                    {formData.locationRegion || "בחר עיר..."}
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                                <Command shouldFilter={false}>
+                                    <CommandInput placeholder="חפש עיר..." value={citySearch} onValueChange={setCitySearch} className="h-9" />
+                                    <CommandList className="max-h-[300px]">
+                                        <CommandEmpty>{cities.length === 0 ? "טוען ערים..." : "לא נמצאה עיר"}</CommandEmpty>
+                                        <CommandGroup>
+                                            {filteredCities.map((city) => (
+                                                <CommandItem key={city} value={city} onSelect={(val) => { setFormData({ ...formData, locationRegion: val }); setCityOpen(false); setCitySearch(""); }}>
+                                                    <Check className={cn("mr-2 h-4 w-4", formData.locationRegion === city ? "opacity-100" : "opacity-0")} />
+                                                    {city}
+                                                </CommandItem>
+                                            ))}
+                                        </CommandGroup>
+                                    </CommandList>
+                                </Command>
+                            </PopoverContent>
+                        </Popover>
+                        {errors.locationRegion && <p className="text-red-500 text-sm">{errors.locationRegion}</p>}
+                    </div>
+
+                    <DialogFooter>
+                        <Button type="submit" disabled={isSubmitting || loadingList || loadingOne}>
+                            {isSubmitting || loadingOne ? "שומר..." : "שמור"}
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
 };
