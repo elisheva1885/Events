@@ -48,14 +48,6 @@ export async function updateBudget(eventId, ownerId, newBudget, historyRecord) {
     { new: true }
   ).select(EVENT_PROJECTION);
 }
-// 🔹 כל האירועים של המשתמש (בלי פגינציה)
-export async function findAllByOwnerId(ownerId, query = {}) {
-  const filter = buildFilter(ownerId, query);
-
-  return Event.find(filter)
-    .sort(DEFAULT_SORT)
-    .select(EVENT_PROJECTION);
-}
 
 // 🔹 רק אירועים רלוונטיים (ברירת מחדל: מהיום והלאה, עם אפשרות from/to ב-query)
 export async function findRelevantByOwnerId(ownerId, query = {}) {
@@ -77,7 +69,7 @@ export async function findRelevantByOwnerId(ownerId, query = {}) {
   }
 
   return Event.find(filter)
-
+}
 
 // 🔹 כל האירועים של משתמש (בלי פגינציה)
 export async function findAllByOwnerId(ownerId, query = {}) {
@@ -153,8 +145,4 @@ export async function deleteById(id, ownerId) {
 }
 
 
-export async function getEventById(id) {
-  return await Event.findById(id)
-    .populate('ownerId', 'name email')
-    .select(EVENT_PROJECTION);
-}
+

@@ -20,10 +20,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popove
 import { Separator } from "../components/ui/separator";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
-import { ScrollArea } from "../components/ui/scroll-area";
 import { initSocket } from "../services/socket";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  addNotification,
   fetchNotifications,
   markNotificationAsRead, 
 } from "../store/notificationsSlice";
@@ -34,6 +34,7 @@ import type { Notification } from "../types/Notification";
 import { formatRelativeTime, getNotificationColor, getNotificationIcon } from "../Utils/NotificationUtils";
 import { ScrollArea } from "../components/ui/scroll-area";
 import { Toaster } from "sonner";
+import type { AppDispatch, RootState } from "@/store";
 
 export default function AppLayout({ navigationItems, children }: { navigationItems: AppRoute[]; children: React.ReactNode }) {
   const dispatch: AppDispatch = useDispatch();
@@ -48,15 +49,19 @@ export default function AppLayout({ navigationItems, children }: { navigationIte
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [navigateNotification, setNavigateNotification] = useState("");
 
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  }
   useEffect(() => {
     dispatch(fetchUser());
   }, [dispatch]);
 
   useEffect(() => {
     if(user?.role==='supplier')
-      setNavigetNotification("/supplier/notifications")
+      setNavigateNotification("/supplier/notifications")
     else
-      setNavigetNotification("/notifications")
+      setNavigateNotification("/notifications")
   }, [user])
   useEffect(() => {
     if (user?._id) {
@@ -69,7 +74,7 @@ export default function AppLayout({ navigationItems, children }: { navigationIte
   useEffect(() => {
     if (!user?._id) return;
     const socket = initSocket(user._id, dispatch);
-    const handleNotification = (notification: any) => dispatch(addNotification(notification));
+    const handleNotification = (notification: Notification) => dispatch(addNotification(notification));
     socket?.on("notification", handleNotification);
     return () => {
       socket?.off("notification", handleNotification);
@@ -113,7 +118,7 @@ export default function AppLayout({ navigationItems, children }: { navigationIte
   );
 
 
-  return (
+  return (<>
     <SidebarProvider style={{ direction: "rtl" } as React.CSSProperties}>
       <Sidebar side="right">
         {/* HEADER */}
