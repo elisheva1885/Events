@@ -15,7 +15,7 @@ const router = Router();
 
 // כל הראוטים כאן מוגנים ע"י auth + role
 router.use(authGuard);
-router.use(roleGuard(['user', 'admin']));
+router.use(roleGuard(['user']));
 
 // יצירת אירוע
 router.post('/', validateBody(createEventSchema), EventController.create);

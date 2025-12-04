@@ -16,11 +16,6 @@ export const SupplierRepository = {
       { status, isActive },
       { new: true }
     ).populate("category", "label");
-
-    if (!updatedSupplier) {
-      throw new Error("ספק לא נמצא");
-    }
-
     return updatedSupplier;
   },
 

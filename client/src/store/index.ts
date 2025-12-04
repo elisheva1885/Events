@@ -7,6 +7,7 @@ import eventsReducer from './eventsSlice'
 import chatReducer from './chatSlice'
 import requestReducer from './requestSlice'
 import contractsReducer  from './contractsSlice'
+import categoriesReducer from './categoriesSlice'
 import paymentsReducer from './paymentsSlice'
 import budgetReducer from './budgetSlice'
 export const store = configureStore({
@@ -21,6 +22,7 @@ export const store = configureStore({
     contracts:contractsReducer,
     payments: paymentsReducer,
     budget: budgetReducer
+    categories: categoriesReducer,
 
   },
 })

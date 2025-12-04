@@ -6,15 +6,8 @@ const DEFAULT_SORT = { date: 1 };
 
 function buildFilter(ownerId, { status, type } = {}) {
   const filter = { ownerId };
-
-  if (status) {
-    filter.status = status;
-  }
-
-  if (type) {
-    filter.type = type;
-  }
-
+  if (status) filter.status = status;
+  if (type) filter.type = type;
   return filter;
 }
 
@@ -45,7 +38,6 @@ export async function updateBudgetAllocated(eventId, amount, session) {
   ).select(EVENT_PROJECTION);
 }
 
-// 🔹 עדכון תקציב + היסטוריה
 export async function updateBudget(eventId, ownerId, newBudget, historyRecord) {
   return Event.findOneAndUpdate(
     { _id: eventId, ownerId },
@@ -85,6 +77,12 @@ export async function findRelevantByOwnerId(ownerId, query = {}) {
   }
 
   return Event.find(filter)
+
+
+// 🔹 כל האירועים של משתמש (בלי פגינציה)
+export async function findAllByOwnerId(ownerId, query = {}) {
+  const filter = buildFilter(ownerId, query);
+  return await Event.find(filter)
     .sort(DEFAULT_SORT)
     .select(EVENT_PROJECTION);
 }
@@ -102,15 +100,23 @@ export async function findRelevantByOwnerId(ownerId, query = {}) {
 //     .select("_id name date"); // רק השדות שרצית
 // }
 
-// 🔹 גרסה עם פג'ינציה (אם תרצי להשתמש בעתיד)
-export async function findByOwnerId(ownerId, query = {}) {
-  const {
-    page = 1,
-    limit = 10,
-    status,
-    type,
-  } = query;
 
+
+// 🔹 אירועים רלוונטיים (פעילים בלבד)
+export async function findUpcomingEventsByOwnerId(ownerId) {
+  const now = new Date();
+
+  return await Event.find({
+    ownerId,
+    date: { $gte: now } // רק אירועים מהיום והלאה
+  })
+    .sort({ date: 1 })        // מיון לפי תאריך עולה
+    .select(EVENT_PROJECTION);
+}
+
+
+export async function findByOwnerId(ownerId, query = {}) {
+  const { page = 1, limit = 10, status, type } = query;
   const pageNumber = Number(page);
   const limitNumber = Number(limit);
   const skip = (pageNumber - 1) * limitNumber;
@@ -146,6 +152,9 @@ export async function deleteById(id, ownerId) {
   return Event.findOneAndDelete({ _id: id, ownerId });
 }
 
-export async function findById(id) {
-  return Event.findById(id).select(EVENT_PROJECTION);
+
+export async function getEventById(id) {
+  return await Event.findById(id)
+    .populate('ownerId', 'name email')
+    .select(EVENT_PROJECTION);
 }
