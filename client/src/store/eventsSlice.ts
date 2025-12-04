@@ -29,6 +29,8 @@ export const fetchEvents = createAsyncThunk<Event[], void>(
   'events/fetchAll',
   async () => {
     const { data } = await api.get<{ success: boolean; data: Event[] }>('/events');
+    console.log('event',data);
+    
     return data.data;
   }
 );
@@ -173,9 +175,7 @@ const eventsSlice = createSlice({
           state.types = action.payload;
         }
       )
-      .addCase(fetchEventTypes.fulfilled, (state, action: PayloadAction<EventType[]>) => {
-        state.types = action.payload;
-      })
+    
       .addCase(fetchEventTypes.rejected, (state, action) => {
         state.error = action.payload || "Network Error";
       })
@@ -205,10 +205,9 @@ const eventsSlice = createSlice({
         if (state.selectedEvent?._id === action.payload) {
           state.selectedEvent = null;
         }
-      // Create event
-      .addCase(createEvent.fulfilled, (state, action: PayloadAction<Event>) => {
-        state.eventsList.push(action.payload);
-      })
+        })
+     
+        
       .addCase(createEvent.rejected, (state, action) => {
         state.error = action.payload || "Error creating event";
       });

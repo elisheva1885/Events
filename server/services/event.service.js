@@ -127,11 +127,11 @@ export async function createEvent(ownerId, data) {
 }
 
 
-// 🔹 כל האירועים – בלי פגינציה
-export async function getUserEvents(ownerId, query) {
-  const events = await repo.findAllByOwnerId(ownerId, query);
-  return { events };
-}
+// // 🔹 כל האירועים – בלי פגינציה
+// export async function getUserEvents(ownerId, query) {
+//   const events = await repo.findAllByOwnerId(ownerId, query);
+//   return { events };
+// }
 
 // 🔹 רק אירועים רלוונטיים (לפי date + פילטרים ב-query)
 export async function getUserRelevantEvents(ownerId, query) {
@@ -176,14 +176,25 @@ export async function getUserEventsPaged(ownerId, query) {
     events: items,
     pagination: buildPagination(total, page, limit),
   };
-export async function getUserEvents(ownerId) {
-  const events = await repo.findByOwnerId(ownerId);
+}
 
-  const eventsWithStatus = events.items
+export async function getUserEvents(ownerId, query = {}) {
+  const { items, total, page, limit } = await repo.findByOwnerId(ownerId, query);
+
+  const events = items
+    // אם כבר מייננת ב-DEFAULT_SORT לפי date, אפשר לוותר
     .sort((a, b) => new Date(a.date) - new Date(b.date))
-    .map(e => ({ ...e.toObject(), autoStatus: e.autoStatus }));
+    .map(e => ({
+      ...e.toObject(),
+      autoStatus: e.autoStatus, // אם זה virtual זה כבר בפנים, אבל לא מזיק
+    }));
 
-  return eventsWithStatus;
+  return {
+    events,
+    total,
+    page,
+    limit,
+  };
 }
 
 /**

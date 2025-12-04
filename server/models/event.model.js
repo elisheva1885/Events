@@ -28,14 +28,12 @@ const eventSchema = new Schema(
     budgetHistory: [budgetHistorySub],
     budgetAllocated: { type: Number, default: 0 },
     estimatedGuests: { type: Number, required: true },
- 
-   
+  },
   { timestamps: true }
 );
 
 // אינדקס לביצועים
 eventSchema.index({ ownerId: 1, date: 1 });
-export default model("Event", eventSchema);
 
 // סטטוס אוטומטי לפי תאריך
 eventSchema.virtual('autoStatus').get(function () {

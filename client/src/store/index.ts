@@ -21,7 +21,7 @@ export const store = configureStore({
     requests: requestReducer,
     contracts:contractsReducer,
     payments: paymentsReducer,
-    budget: budgetReducer
+    budget: budgetReducer,
     categories: categoriesReducer,
 
   },
