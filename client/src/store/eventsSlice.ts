@@ -127,7 +127,7 @@ const eventsSlice = createSlice({
       })
       .addCase(fetchEvents.rejected, (state, action) => {
         state.loadingList = false;
-        state.error = action.error.message;
+        state.error = action.payload || "Network Error";
       })
 
       // ---- רלוונטיים ----
@@ -162,8 +162,9 @@ const eventsSlice = createSlice({
       })
 
       // ---- סוגי אירועים ----
+      // Fetch event types (לא משפיע על loadingList)
       .addCase(fetchEventTypes.pending, (state) => {
-        state.loadingList = true;
+        state.error = undefined;
       })
       .addCase(
         fetchEventTypes.fulfilled,
@@ -172,9 +173,11 @@ const eventsSlice = createSlice({
           state.types = action.payload;
         }
       )
+      .addCase(fetchEventTypes.fulfilled, (state, action: PayloadAction<EventType[]>) => {
+        state.types = action.payload;
+      })
       .addCase(fetchEventTypes.rejected, (state, action) => {
-        state.loadingList = false;
-        state.error = action.error.message;
+        state.error = action.payload || "Network Error";
       })
 
       // ---- יצירה ----
@@ -202,6 +205,12 @@ const eventsSlice = createSlice({
         if (state.selectedEvent?._id === action.payload) {
           state.selectedEvent = null;
         }
+      // Create event
+      .addCase(createEvent.fulfilled, (state, action: PayloadAction<Event>) => {
+        state.eventsList.push(action.payload);
+      })
+      .addCase(createEvent.rejected, (state, action) => {
+        state.error = action.payload || "Error creating event";
       });
   },
 });

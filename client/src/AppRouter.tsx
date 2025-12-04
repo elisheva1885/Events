@@ -12,7 +12,7 @@ import { PendingSuppliersPage } from "./pages/admin/PendingSuppliersPage";
 import { ActiveSuppliersPage } from "./pages/admin/ActiveSuppliersPage";
 import { SupplierDetailsPage } from "./pages/admin/SupplierDetailsPage";
 import { UsersPage } from "./pages/admin/UsersPage";
-import { getUserRole } from "./api/auth";
+import { getUserRole } from "./services/auth";
 import type { AppRoute } from "./types/AppRouter";
 import SupplierDashboard from "./pages/Supplier/SupplierDashboard";
 import { RequestPage } from "./pages/RequestPage";
@@ -20,14 +20,18 @@ import { Calendar, FileText, LayoutDashboard, Send, Store ,Wallet,BellIcon,Messa
 import SupplierRequestPage from "./pages/Supplier/SupplierRequestPage";
 import SupplierContractsPage from "./pages/Supplier/SupplierContractsPage";
 import ContractsPage from "./pages/ContractsPage";
+import { TermsOfService } from "./pages/TermsOfService";
+import { PrivacyPolicy } from "./pages/PrivacyPolicy";
 import NotificationsPage from "./pages/NotificationsPage";
 import DashboardUser from "./pages/DahboardUser";
 import ContractsPaymentsPage from "./pages/ContractsPaymentsPage";
 import BudgetManagementPage from "./pages/BudgetManagementPage";
+import { useDispatch } from "react-redux";
+import { fetchUser } from "./store/authSlice";
+import type { AppDispatch } from "./store";
 
 export default function AppRouter() {
-
-
+  const dispatch: AppDispatch = useDispatch();
 
   const userRoutes = [
     { title: "לוח בקרה", path: "/dashboard", element: < DashboardUser />, icon: LayoutDashboard },
@@ -55,13 +59,13 @@ export default function AppRouter() {
   //   { path: "/admin/active-suppliers", element: <ActiveSuppliersPage /> },
   //   { path: "/admin/users", element: <UsersPage /> },
   // ];
-  const renderRoutes = (routes: AppRoute[]) =>
+  const renderRoutes = (routes: AppRoute[], requiredRole?: 'admin' | 'user' | 'supplier') =>
     routes.map((route) => (
       <Route
         key={route.path}
         path={route.path}
         element={
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole={requiredRole}>
             <AppLayout navigationItems={routes}>{route.element}</AppLayout>
           </ProtectedRoute>
         }
@@ -70,52 +74,45 @@ export default function AppRouter() {
   const navigate = useNavigate();
 
   const handleNavigate = (page: "landing" | "login" | "register") => {
-    console.log('handleNavigate', page);
     if (page === "landing") navigate("/");
     else if (page === "login") navigate("/login");
     else if (page === "register") navigate("/register");
   };
 
-  const handleLogin = () => {
+  const handleLoginAndRegister = async () => {
     console.log("User logged in");
-    const userRole = getUserRole();
+    
+    // טוען את פרטי המשתמש לפני ניווט
+    await dispatch(fetchUser());
+    
+    // מקבל את ה-role מהשרת
+    const userRole =  getUserRole();
+    
     if (userRole === 'admin') {
       navigate("/admin/dashboard");
-    } else if (userRole === 'supplier') {
+    } else if (userRole === 'supplier') {      
       navigate("/supplier/dashboard");
-    }
-    else {
+    } else {
       navigate("/dashboard");
     }
   };
 
-  const handleRegister = () => {
-    console.log("User registered");
-     const userRole = getUserRole();
-    if (userRole === 'admin') {
-      navigate("/admin/dashboard");
-    } else if (userRole === 'supplier') {
-      navigate("/supplier/dashboard");
-    }
-    else {
-      navigate("/dashboard");
-    }
-  };
   return (
     <Routes>
       <Route path="/" element={<LandingPage onNavigate={handleNavigate} />} />
       <Route
         path="/login"
-        element={<LoginPage onLogin={handleLogin} onNavigate={handleNavigate} />}
+        element={<LoginPage onLogin={handleLoginAndRegister} onNavigate={handleNavigate} />}
       />
       <Route
         path="/register"
-        element={<RegisterPage onRegister={handleRegister} onNavigate={handleNavigate} />}
+        element={<RegisterPage onRegister={handleLoginAndRegister} onNavigate={handleNavigate} />}
       />
-
+      <Route path="/terms-of-service" element={<TermsOfService />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       {/* Protected Routes */}
-      {renderRoutes(userRoutes)}
-      {renderRoutes(supplierRoutes)}
+      {renderRoutes(userRoutes, 'user')}
+      {renderRoutes(supplierRoutes, 'supplier')}
     
       {/* Admin Routes */}
       <Route

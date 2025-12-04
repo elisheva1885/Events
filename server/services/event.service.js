@@ -121,7 +121,9 @@ export async function createEvent(ownerId, data) {
     ];
   }
 
-  return repo.create(eventData);
+  const event = await repo.create(eventData);
+    return { ...event.toObject(), autoStatus: event.autoStatus };
+
 }
 
 
@@ -137,24 +139,28 @@ export async function getUserRelevantEvents(ownerId, query) {
   return { events };
 }
 
+/**
+ * קבלת אירוע לפי ID
+ */
 export async function getEventById(id, ownerId) {
-  const event = await repo.findById(id);
+  const event = await repo.getEventById(id);
 
   if (!event) {
-    throw new AppError(404, "The event doesn't exist");
-  }
+ throw new AppError(404, 'האירוע לא נמצא');  }
 
   const eventOwnerId =
     event.ownerId?._id?.toString?.() ?? event.ownerId?.toString?.();
   console.log(eventOwnerId,ownerId);
   
   if (eventOwnerId !== ownerId.toString()) {
-    throw new AppError(403, 'You are not authorized to view this event');
+    throw new AppError(403, 'אין לך הרשאה לצפות באירוע הזה');
   }
-
-  return event;
+  return { ...event.toObject(), autoStatus: event.autoStatus };
 }
 
+/**
+ * קבלת סוגי אירועים
+ */
 export function getEventTypes() {
   return EVENT_TYPES;
 }
@@ -170,8 +176,19 @@ export async function getUserEventsPaged(ownerId, query) {
     events: items,
     pagination: buildPagination(total, page, limit),
   };
+export async function getUserEvents(ownerId) {
+  const events = await repo.findByOwnerId(ownerId);
+
+  const eventsWithStatus = events.items
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+    .map(e => ({ ...e.toObject(), autoStatus: e.autoStatus }));
+
+  return eventsWithStatus;
 }
 
+/**
+ * עדכון אירוע
+ */
 export async function updateEvent(id, ownerId, data) {
   const event = await repo.updateById(id, ownerId, data);
   if (!event) {
@@ -184,17 +201,21 @@ export async function updateEvent(id, ownerId, data) {
   return event;
 }
 
+/**
+ * מחיקת אירוע
+ */
 export async function deleteEvent(id, ownerId) {
   const event = await repo.deleteById(id, ownerId);
 
   if (!event) {
     throw new AppError(
       404,
-      "The event doesn't exist or you are not authorized to delete it"
+      "האירוע לא נמצא או אין לך הרשאה למחוק את האירוע"
     );
   }
 
-  return event;
+  return  event;
+
 }
 export async function updateEventBudget(eventId, userId, newBudget, reason) {
   const event = await repo.getEventById(eventId);
@@ -229,4 +250,6 @@ export async function updateEventBudget(eventId, userId, newBudget, reason) {
   }
 
   return updated;
+    
+
 }
