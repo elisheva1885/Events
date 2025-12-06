@@ -64,7 +64,11 @@ export async function serviceGetThreadsForUser(userId) {
 }
 
 export async function serviceGetThreadsForSupplier(supplierUserId) {
+  console.log("Service: Getting threads for supplier user:", supplierUserId);
   const supplierId = await SupplierRepository.getSupplierIdByUserId(supplierUserId);
+  if (!supplierId) {
+      throw new AppError(404, "ספק לא נמצא");
+    }
   const threads = await repo.getThreadsForSupplier(supplierId);
   const enrichedThreads = await enrichThreads(threads, supplierUserId);
   return enrichedThreads;

@@ -1,77 +1,147 @@
-import '../models/event.model.js'; 
-import '../models/user.model.js';
-import '../models/supplier.model.js'; 
-import Contract from '../models/contract.model.js';
-import Supplier from '../models/supplier.model.js';
+import "../models/event.model.js";
+import "../models/user.model.js";
+import "../models/supplier.model.js";
+import Contract from "../models/contract.model.js";
 
-// יצירת חוזה חדש
+const CONTRACT_POPULATE_SPEC = [
+  { path: "eventId", select: "name date" },
+  { path: "clientId", select: "name email" },
+  {
+    path: "clientSignatures.clientId",
+    select: "name email",
+  },
+  {
+    path: "supplierSignature.supplierId",
+    select: "name email user",
+    populate: { path: "user", select: "name email" },
+  },
+  {
+    path: "supplierId",
+    populate: { path: "user", select: "name email" },
+  },
+];
+export function contractMatchesSearch(contract, searchTerm) {
+  if (!searchTerm) return true;
+
+  const term = String(searchTerm).toLowerCase();
+
+  const eventName = contract.eventId?.name?.toLowerCase?.() || "";
+  const clientName = contract.clientId?.name?.toLowerCase?.() || "";
+  const supplierName =
+    contract.supplierId?.name?.toLowerCase?.() ||
+    contract.supplierId?.user?.name?.toLowerCase?.() ||
+    "";
+
+  const notes = (contract.paymentPlan || [])
+    .map((p) => p.note?.toLowerCase?.() || "")
+    .join(" ");
+
+  return (
+    eventName.includes(term) ||
+    clientName.includes(term) ||
+    supplierName.includes(term) ||
+    notes.includes(term)
+  );
+}
 export async function createContract(contractData) {
-    let contract = await Contract.create(contractData);
-    return await fullContractPopulate(Contract.findById(contract._id));
+  const contract = await Contract.create(contractData);
+  return await populateContractQuery(Contract.findById(contract._id));
 }
 
-function fullContractPopulate(query) {
-    return query
-        .populate('eventId', 'name date')
-        .populate('clientId', 'name email')
-        .populate({
-            path: 'clientSignatures.clientId',
-            select: 'name email'
-        })
-        .populate({
-            path: 'supplierSignature.supplierId',
-            select: 'name email user',
-            populate: {
-                path: 'user',
-                select: 'name email'
-            }
-        })
-        .populate({
-            path: 'supplierId',
-            populate: {
-                path: 'user',
-                select: 'name email'
-            }
-        });
+export async function populateContractDoc(contract) {
+  await contract.populate(CONTRACT_POPULATE_SPEC);
+  return contract;
 }
 
-// שליפת חוזה לפי מזהה
+function populateContractQuery(query) {
+  return query.populate(CONTRACT_POPULATE_SPEC);
+}
+
 export async function getContractById(id) {
-    const contract = await Contract.findById(id)
-        .populate('eventId')
-        .populate('supplierId')
-        .populate('clientId');
-    if (!contract) throw new Error('Contract not found');
-    
-    // וודא שכל החתימות מוחזרות עם signatureS3Key
-    if (contract.supplierSignature) {
-        console.log('📋 Supplier Signature S3Key:', contract.supplierSignature.signatureS3Key);
-    }
-    contract.clientSignatures?.forEach((sig, idx) => {
-        console.log(`📋 Client Signature ${idx} S3Key:`, sig.signatureS3Key);
-    });
-    
-    return contract;
+  return populateContractQuery(Contract.findById(id));
 }
 
-// עדכון (למשל לצורך חתימה או שינוי סטטוס)
 export async function updateContract(id, updateData) {
-    let query = Contract.findByIdAndUpdate(id, updateData, { new: true });
-    const updated = await fullContractPopulate(query);
-    return updated;
+  const query = Contract.findByIdAndUpdate(id, updateData, { new: true });
+  const updated = await populateContractQuery(query);
+  return updated;
+}
+
+export async function checkIfContractExists({
+  eventId,
+  supplierId,
+  clientId,
+  status,
+}) {
+  return Contract.findOne({
+    eventId,
+    supplierId,
+    clientId,
+    status,
+  });
 }
 
 
-// שליפת חוזים לפי ספק
-export async function getContractsBySupplier(userId) {
-    const supplier = await Supplier.findOne({ user: userId });
-    if (!supplier) return [];
 
-    let query = Contract.find({ supplierId: supplier._id }).sort({ createdAt: -1 });
-    return await fullContractPopulate(query);
+export async function getContractsBySupplier(
+  supplierId,
+  { page = 1, limit = 10, status, eventId, searchTerm } = {}
+) {
+  const filter = { supplierId };
+  if (status) filter.status = status;
+  if (eventId) filter.eventId = eventId;
+
+  const pageNumber = Number(page) || 1;
+  const limitNumber = Number(limit) || 10;
+  const skip = (pageNumber - 1) * limitNumber;
+
+  const docs = await populateContractQuery(
+    Contract.find(filter).sort({ createdAt: -1 })
+  );
+
+  const filtered = searchTerm
+    ? docs.filter((c) => contractMatchesSearch(c, searchTerm))
+    : docs;
+
+  const total = filtered.length;
+  const pageItems = filtered.slice(skip, skip + limitNumber);
+
+  return {
+    items: pageItems,
+    total,
+    page: pageNumber,
+    pageSize: limitNumber,
+    totalPages: Math.ceil(total / limitNumber) || 1,
+  };
 }
+export async function getContractsByClient(
+  userId,
+  { page = 1, limit = 10, status, eventId, searchTerm } = {}
+) {
+  const filter = { clientId: userId };
+  if (status) filter.status = status;
+  if (eventId) filter.eventId = eventId;
 
-export async function getContractsByClient(userId) {
-    let query = Contract.find({ clientId: userId }).sort({ createdAt: -1 });
-    return await fullContractPopulate(query);
+  const pageNumber = Number(page) || 1;
+  const limitNumber = Number(limit) || 10;
+  const skip = (pageNumber - 1) * limitNumber;
+
+  const docs = await populateContractQuery(
+    Contract.find(filter).sort({ createdAt: -1 })
+  );
+
+  const filtered = searchTerm
+    ? docs.filter((c) => contractMatchesSearch(c, searchTerm))
+    : docs;
+
+  const total = filtered.length;
+  const pageItems = filtered.slice(skip, skip + limitNumber);
+
+  return {
+    items: pageItems,
+    total,
+    page: pageNumber,
+    pageSize: limitNumber,
+    totalPages: Math.ceil(total / limitNumber) || 1,
+  };
 }

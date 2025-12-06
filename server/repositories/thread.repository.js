@@ -39,10 +39,12 @@ async function getThreadsByFilter(filter) {
 }
 
 export async function getThreadsForUser(userId) {
+  console.log("Repository: Getting threads for user:", userId);
   return getThreadsByFilter({ userId });
 }
 
 export async function getThreadsForSupplier(supplierId) {
+    console.log("Repository: Getting threads for supplier:", userId);
   return getThreadsByFilter({ supplierId });
 }
 

@@ -16,10 +16,17 @@ ipAddress: string;
 at: Date;
 }
 
+export interface ContractPayment {
+dueDate: string;
+amount: number;
+note: string;
+}
+
 export interface Contract {
 _id: string;
 s3Key: string;
 status: 'טיוטה' | 'ממתין לספק' | 'ממתין ללקוח' | 'פעיל' | 'הושלם' | 'מבוטל';
+paymentPlan: ContractPayment[];
 basicEventSummary?: string;
 supplierSignature?: ContractSignature;
 clientSignatures?: ContractSignature[];

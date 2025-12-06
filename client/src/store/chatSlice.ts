@@ -32,11 +32,15 @@ let socket: Socket | null = null;
 // ===========================
 export const fetchThreads = createAsyncThunk<
   Thread[],
-  { userId: string },
+  { role: "user" | "supplier"  },
   { rejectValue: string }
->("chat/fetchThreads", async ({ userId }, thunkAPI) => {
+>("chat/fetchThreads", async (role, thunkAPI) => {
   try {
-    const { data } = await api.get(`/threads/user`);
+    const url =  role === "supplier" 
+        ? `/threads/supplier`
+        : `/threads/user`;
+    const { data } = await api.get(url);
+    console.log("fetch threads data ", data);
     return data;
   } catch (err: any) {
     return thunkAPI.rejectWithValue(err.message);
@@ -57,18 +61,18 @@ export const fetchMessages = createAsyncThunk<
 });
 
 // שליחת הודעה דרך REST (ברגע שתרצי — אפשר להפוך ל־socket emit)
-export const sendMessage = createAsyncThunk<
-  Message,
-  { threadId: string; body: string },
-  { rejectValue: string; state: RootState }
->("chat/sendMessage", async ({ threadId, body }, thunkAPI) => {
-  try {
-    const { data } = await api.post(`/messages`, { threadId, body });
-    return data;
-  } catch (err: any) {
-    return thunkAPI.rejectWithValue(err.message);
-  }
-});
+// export const sendMessage = createAsyncThunk<
+//   Message,
+//   { threadId: string; body: string },
+//   { rejectValue: string; state: RootState }
+// >("chat/sendMessage", async ({ threadId, body }, thunkAPI) => {
+//   try {
+//     const { data } = await api.post(`/messages`, { threadId, body });
+//     return data;
+//   } catch (err: any) {
+//     return thunkAPI.rejectWithValue(err.message);
+//   }
+// });
 
 // ===========================
 // SLICE
@@ -115,15 +119,15 @@ const chatSlice = createSlice({
         }
       })
 
-      .addCase(sendMessage.fulfilled, (state, action) => {
-        const msg = action.payload;
-        const tid = msg.threadId;
+      // .addCase(sendMessage.fulfilled, (state, action) => {
+      //   const msg = action.payload;
+      //   const tid = msg.threadId;
 
-        if (!state.messagesByThread[tid]) {
-          state.messagesByThread[tid] = [];
-        }
-        state.messagesByThread[tid].push(msg);
-      });
+      //   if (!state.messagesByThread[tid]) {
+      //     state.messagesByThread[tid] = [];
+      //   }
+      //   state.messagesByThread[tid].push(msg);
+      // });
   },
 });
 

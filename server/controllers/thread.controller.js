@@ -27,12 +27,9 @@ export const getThread = asyncHandler(async(req, res)=> {
 // כל הת'רדים של משתמש
 export const getUserThreads = asyncHandler(async(req, res)=> {
   // Accept userId from route param or from authenticated user (passport)
-  let userId = req.params?.userId;
-  if (!userId) {
+  console.log(req.user)
     // passport may have set req.user with id or _id
-    userId = req.user?.id || req.user?._id;
-  }
-
+    const userId = req.user?.id || req.user?._id;
   console.log("Getting threads for user:", userId);
 
   if (!userId) {
@@ -45,7 +42,7 @@ export const getUserThreads = asyncHandler(async(req, res)=> {
 
 // כל הת'רדים של ספק
 export const getSupplierThreads = asyncHandler(async(req, res) => {
-  const { supplierId } = req.params;
+  const { supplierId } = req.user.id || req.user?._id;
   const threads = await srv.serviceGetThreadsForSupplier(supplierId);
   res.json(threads);
 });

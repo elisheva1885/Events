@@ -4,21 +4,25 @@ import { io, Socket } from 'socket.io-client';
 let socket: Socket | undefined;
 
 export function getSocket(token?: string) {
-  if (socket && socket.connected) return socket;
-  const url = ((import.meta as any).env?.VITE_SOCKET_URL as string) || 'http://localhost:3000';
+  const url = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000';
+
+  if (socket) {
+    if (!socket.connected) {
+      socket.auth = { token };
+      socket.connect();
+    }
+    return socket;
+  }
+
   socket = io(url, {
-  query: { token },
-  transports: ['websocket'],
-  reconnection: true,
-});
-  socket.on('connect', () => {
-    console.log('[Socket] Connected:', socket?.id, 'to', url);
+    auth: { token },
+    transports: ['websocket'],
+    reconnection: true,
   });
-  socket.on('disconnect', (reason) => {
-    console.log('[Socket] Disconnected:', reason);
-  });
-  socket.on('connect_error', (err) => {
-    console.error('[Socket] Connect error:', err);
-  });
+
+  socket.on('connect', () => console.log('[Socket] Connected:', socket?.id, 'to', url));
+  socket.on('disconnect', (reason) => console.log('[Socket] Disconnected:', reason));
+  socket.on('connect_error', (err) => console.error('[Socket] Connect error:', err));
+
   return socket;
 }

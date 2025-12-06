@@ -5,6 +5,7 @@ import { initSocket } from "./websocket/socket.js"
 import helmet from 'helmet';
 import http from 'http';
 import rateLimit from 'express-rate-limit';
+import cookieParser from "cookie-parser";
 import router from './routes/index.router.js';
 import { connectMongo } from './db/connect.db.js';
 import { mongoHealth } from './db/health.db.js';
@@ -17,19 +18,20 @@ const server = http.createServer(app);
 initSocket(server);
 const PORT = process.env.PORT || 5000;
 
-app.use(helmet());
+// app.use(helmet());
 
 app.use(express.json());
 
 app.use(express.static('public'));
 
 const corsOptions = {
-  origin: '*', 
+  origin: ['http://localhost:5173', 'http://localhost:3000', process.env.FRONTEND_URL].filter(Boolean), 
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 };
 app.use(cors(corsOptions));
+app.use(cookieParser());
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, 

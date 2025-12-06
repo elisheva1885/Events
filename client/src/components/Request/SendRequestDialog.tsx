@@ -5,22 +5,22 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "../components/ui/dialog";
-import { Button } from "../components/ui/button";
-import { Label } from "../components/ui/label";
-import { Textarea } from "../components/ui/textarea";
+} from "../../components/ui/dialog";
+import { Button } from "../../components/ui/button";
+import { Label } from "../../components/ui/label";
+import { Textarea } from "../../components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../components/ui/select";
+} from "../../components/ui/select";
 import { useDispatch, useSelector } from "react-redux";
-import type { Supplier } from "../types/Supplier";
-import type { Event } from "../types/type";
-import type { AppDispatch, RootState } from "../store";
-import { fetchEvents } from "../store/eventsSlice";
+import type { Supplier } from "../../types/Supplier";
+import type { Event } from "../../types/type";
+import type { AppDispatch, RootState } from "../../store";
+import { fetchEvents, fetchRelevantEvents } from "../../store/eventsSlice";
 
 interface SendRequestDialogProps {
   supplier: Supplier;
@@ -50,7 +50,7 @@ export const SendRequestDialog = ({
   const supplierId = supplier._id;
 
   useEffect(() => {
-    dispatch(fetchEvents());
+    dispatch(fetchRelevantEvents());    
   }, []);
 
   // בחירת אירוע ראשון אוטומטית
@@ -70,13 +70,13 @@ export const SendRequestDialog = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    
     await onSubmit({
       eventId,
       requestMessage,
       supplierId       
     });
-
+    
     onOpenChange(false);
   };
 

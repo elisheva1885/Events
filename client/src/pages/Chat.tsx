@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../store";
-import { fetchThreads, fetchMessages, sendMessage, joinThread } from "../store/chatSlice";
+import { fetchThreads, fetchMessages, joinThread } from "../store/chatSlice";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Textarea } from "../components/ui/textarea";
@@ -9,14 +9,13 @@ import { Badge } from "../components/ui/badge";
 import { Send, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback } from "../components/ui/avatar";
-import { formatMessageTime } from "../utils/DataUtils";
+import { formatMessageTime } from "../Utils/DataUtils";
 import type { Thread } from "../types/Thread";
 import { getSocket } from "../services/socket";
 
 export default function Chat() {
   const dispatch = useDispatch<AppDispatch>();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
   const user = useSelector((state: RootState) => state.auth.user);
   const token = useSelector((state: RootState) => state.auth.token);
   const threads = useSelector((state: RootState) => state.chat.threads ?? []);
@@ -46,11 +45,11 @@ export default function Chat() {
 
   // Fetch threads on load
   useEffect(() => {
-    if (!user?._id) return;
-    dispatch(fetchThreads({
-      id: user._id,
-      role: user.role === "supplier" ? "supplier" : "user",
-    }));
+    type AllowedRole = "user" | "supplier";
+
+    const role: AllowedRole = user.role === "supplier" ? "supplier" : "user";
+
+    dispatch(fetchThreads({ role }));
   }, [user, dispatch]);
 
   // Join thread and fetch messages
@@ -60,6 +59,12 @@ export default function Chat() {
       dispatch(fetchMessages({ threadId: selectedThreadId }));
     }
   }, [selectedThreadId, dispatch]);
+
+  useEffect(() => {
+    if (selectedThreadId && socketInstance) {
+      socketInstance.emit("join_thread", selectedThreadId);
+    }
+  }, [selectedThreadId, socketInstance]);
 
   // Thread opened: mark as read
   const onThreadOpened = (thread: Thread) => {
@@ -107,6 +112,8 @@ export default function Chat() {
   // Send message
   const handleSendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    console.log("aaaaaaaaa ", messageText.trim(), selectedThreadId, user, socketInstance);
+
     if (!messageText.trim() || !selectedThreadId || !user || !socketInstance) return;
 
     const thread = safeThreads.find(t => t._id === selectedThreadId);
@@ -127,20 +134,7 @@ export default function Chat() {
     }
   };
 
-  // Debug test send
-  const handleTestSend = async () => {
-    if (!selectedThreadId) {
-      setDebugLog((s) => [...s, "no thread selected"]);
-      return;
-    }
-    try {
-      setDebugLog((s) => [...s, "test send -> dispatching sendMessage..."]);
-      await dispatch(sendMessage({ threadId: selectedThreadId, body: "[test] hello" })).unwrap();
-      setDebugLog((s) => [...s, "test send succeeded"]);
-    } catch (err: any) {
-      setDebugLog((s) => [...s, `test send error: ${err?.message || err}`]);
-    }
-  };
+
 
   // Helpers
   const getThreadName = (thread: Thread) => user?.role === "supplier" ? thread.clientName : thread.supplierName;
@@ -181,20 +175,6 @@ export default function Chat() {
         <Card className={`md:col-span-2 flex flex-col overflow-hidden ${!selectedThreadId || (!isMobileView && window.innerWidth < 768) ? "hidden md:flex" : ""}`}>
           {selectedThreadId ? (
             <>
-              {/* Debug panel */}
-              <div className="p-2 border-b bg-muted/50 text-xs">
-                <div className="flex items-center gap-4">
-                  <div>token: <span className="font-mono break-all">{token ? token.slice(0, 40) + (token.length > 40 ? "..." : "") : "(none)"}</span></div>
-                  <div>socket: <strong>{socketInstance?.connected ? 'connected' : 'disconnected'}</strong></div>
-                  <button onClick={handleTestSend} className="ml-auto bg-primary text-white px-2 py-1 rounded">Test send</button>
-                </div>
-                <div className="mt-2">
-                  <div className="whitespace-pre-wrap text-xs max-h-24 overflow-y-auto">
-                    {debugLog.map((l, i) => <div key={i}>{l}</div>)}
-                  </div>
-                </div>
-              </div>
-
               <CardHeader className="border-b">
                 <div className="flex items-center gap-3">
                   <Button variant="ghost" size="sm" className="md:hidden" onClick={() => { setIsMobileView(false); setSelectedThreadId(null); }}>

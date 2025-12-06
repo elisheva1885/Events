@@ -7,7 +7,9 @@ import eventsReducer from './eventsSlice'
 import chatReducer from './chatSlice'
 import requestReducer from './requestSlice'
 import contractsReducer  from './contractsSlice'
-
+import categoriesReducer from './categoriesSlice'
+import paymentsReducer from './paymentsSlice'
+import budgetReducer from './budgetSlice'
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -18,6 +20,9 @@ export const store = configureStore({
     chat: chatReducer,
     requests: requestReducer,
     contracts:contractsReducer,
+    payments: paymentsReducer,
+    budget: budgetReducer,
+    categories: categoriesReducer,
 
   },
 })
