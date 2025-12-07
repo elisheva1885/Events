@@ -23,7 +23,6 @@ import { Button } from "../components/ui/button";
 import { initSocket } from "../services/socket";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  addNotification,
   fetchNotifications,
   markNotificationAsRead, 
 } from "../store/notificationsSlice";
@@ -34,6 +33,7 @@ import { formatRelativeTime, getNotificationColor, getNotificationIcon } from ".
 import { ScrollArea } from "../components/ui/scroll-area";
 import { Toaster } from "sonner";
 import type { AppDispatch, RootState } from "@/store";
+import { fetchUser } from "@/store/authSlice";
 
 export default function AppLayout({ navigationItems, children }: { navigationItems: AppRoute[]; children: React.ReactNode }) {
   const dispatch: AppDispatch = useDispatch();
@@ -52,23 +52,22 @@ export default function AppLayout({ navigationItems, children }: { navigationIte
     logout();
     navigate("/login");
   }
-  // useEffect(() => {
-  //   dispatch(fetchUser());
-  // }, [dispatch]);
+  useEffect(() => {
+    dispatch(fetchUser());
+  }, [dispatch]);
 
-  // useEffect(() => {
-  //   if(user?.role==='supplier')
-  //     setNavigateNotification("/supplier/notifications")
-  //   else
-  //     setNavigateNotification("/notifications")
-  // }, [user])
-  // useEffect(() => {
-  //   if (user?._id) {
-  //     // const socket = 
-  //     initSocket(user._id, dispatch);
-  //     dispatch(fetchNotifications());
-  //   }
-  // }, [user,dispatch]);
+  useEffect(() => {
+    if(user?.role==='supplier')
+      setNavigateNotification("/supplier/notifications")
+    else
+      setNavigateNotification("/notifications")
+  }, [user])
+  useEffect(() => {
+    if (user?._id) {
+      initSocket(user._id, dispatch);
+      dispatch(fetchNotifications());
+    }
+  }, [user,dispatch]);
 
   // /** SOCKET + LISTENERS */
   // useEffect(() => {
@@ -101,25 +100,25 @@ useEffect(() => {
 }, [user?.role]); // מספיק role, לא כל user
 
 // 3. initSocket + fetchNotifications פעם אחת כשיש user._id
-useEffect(() => {
-  if (!user?._id) return;
+// useEffect(() => {
+//   if (!user?._id) return;
 
-  const socket = initSocket(user._id, dispatch);
+//   const socket = initSocket(user._id, dispatch);
 
-  // פעם אחת כשנכנסים – להביא התראות מהשרת
-  dispatch(fetchNotifications());
+//   // פעם אחת כשנכנסים – להביא התראות מהשרת
+//   dispatch(fetchNotifications());
 
-  const handleNotification = (notification: Notification) => {
-    dispatch(addNotification(notification));
-  };
+//   const handleNotification = (notification: Notification) => {
+//     dispatch(addNotification(notification));
+//   };
 
-  socket?.on("notification", handleNotification);
+//   socket?.on("notification", handleNotification);
 
-  return () => {
-    socket?.off("notification", handleNotification);
-    socket?.disconnect?.();
-  };
-}, [user?._id, dispatch]);
+//   return () => {
+//     socket?.off("notification", handleNotification);
+//     socket?.disconnect?.();
+//   };
+// }, [user?._id, dispatch]);
 
   /** USER INITIALS */
   const userInitials = useMemo(() => {
