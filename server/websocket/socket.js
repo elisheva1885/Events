@@ -17,9 +17,11 @@ export function initSocket(server) {
 
   // ---- JWT MIDDLEWARE ----
 io.use((socket, next) => {
-  console.log("auth object:", socket.handshake.auth);
 
-  const token = socket.handshake.auth.token;
+   const cookies = socket.request.headers.cookie;
+  const token = cookies?.split("; ").find(c => c.startsWith("token="))?.split("=")[1];
+  console.log("auth object:", token);
+
   if (!token) {
     console.log("No token received");
     return next(new Error("Unauthorized"));

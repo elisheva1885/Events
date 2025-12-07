@@ -10,14 +10,17 @@ export function getSocket(token?: string) {
     if (!socket.connected) {
       socket.auth = { token };
       socket.connect();
+      console.log("socket connected");
+      
     }
     return socket;
   }
 
   socket = io(url, {
-    auth: { token },
+    // auth: { token },
     transports: ['websocket'],
-    reconnection: true,
+    // reconnection: true,
+    withCredentials: true,
   });
 
   socket.on('connect', () => console.log('[Socket] Connected:', socket?.id, 'to', url));

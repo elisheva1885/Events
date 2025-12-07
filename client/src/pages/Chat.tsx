@@ -29,28 +29,41 @@ export default function Chat() {
 
   // Initialize socket
   useEffect(() => {
-    if (!user) return;
-    if (!token) return; // בודק null ו־undefined
-    const socket = getSocket(token);
-    console.log({socket , token});
-    
-    setSocketInstance(socket);
+    console.log("useEffect runs", { user, token });
 
-    const handler = (msg: any) => {
+    const socket = getSocket();
+
+    const handleConnect = () => {
+      console.log("Socket connected:", socket.id);
+      console.log("selectedThreadId", selectedThreadId);
+      
+      // אם יש thread שנבחר, הצטרף אליו מיד
+      if (selectedThreadId) {
+        socket.emit("join_thread", selectedThreadId);
+      }
+    };
+
+    const handleNewMessage = (msg: any) => {
       dispatch({ type: "chat/appendMessage", payload: msg });
     };
-    socket.on("new_message", handler);
+
+    socket.on("connect", handleConnect);
+    socket.on("new_message", handleNewMessage);
+
+    setSocketInstance(socket);
 
     return () => {
-      socket.off("new_message", handler);
+      socket.off("connect", handleConnect);
+      socket.off("new_message", handleNewMessage);
+      socket.disconnect();
     };
-  }, [user, token, dispatch]);
+  }, [user, token, dispatch, selectedThreadId]);
 
   // Fetch threads on load
   useEffect(() => {
     type AllowedRole = "user" | "supplier";
 
-    const role: AllowedRole = user.role === "supplier" ? "supplier" : "user";
+    const role: AllowedRole = user?.role === "supplier" ? "supplier" : "user";
 
     dispatch(fetchThreads({ role }));
   }, [user, dispatch]);
@@ -120,8 +133,8 @@ export default function Chat() {
     if (!messageText.trim() || !selectedThreadId || !user || !socketInstance) return;
     console.log("message: ", messageText);
 
-    const thread = safeThreads.find(t => t._id === selectedThreadId);
-    if (!thread) return;
+    // const thread = safeThreads.find(t => t._id === selectedThreadId);
+    // if (!thread) return;
 
     try {
       // שולחים רק את ה-threadId וה-body
@@ -129,7 +142,8 @@ export default function Chat() {
         threadId: selectedThreadId,
         body: messageText.trim(),
       });
-
+      console.log("after sending");
+      
       setDebugLog((s) => [...s, `sent: ${messageText.trim()}`]);
       setMessageText("");
     } catch {

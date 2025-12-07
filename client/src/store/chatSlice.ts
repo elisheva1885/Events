@@ -32,20 +32,19 @@ let socket: Socket | null = null;
 // ===========================
 export const fetchThreads = createAsyncThunk<
   Thread[],
-  { role: "user" | "supplier"  },
+  { role: "user" | "supplier" },
   { rejectValue: string }
->("chat/fetchThreads", async (role, thunkAPI) => {
+>("chat/fetchThreads", async ({ role }, thunkAPI) => {
   try {
-    const url =  role === "supplier" 
-        ? `/threads/supplier`
-        : `/threads/user`;
+    const url = role === "supplier" ? `/threads/supplier` : `/threads/user`;
     const { data } = await api.get(url);
-    console.log("fetch threads data ", data);
+    // data כבר מכיל fields: _id, userId, supplierId, supplierName, clientName, eventName, status, hasUnread
     return data;
   } catch (err: any) {
     return thunkAPI.rejectWithValue(err.message);
   }
 });
+
 
 export const fetchMessages = createAsyncThunk<
   Message[],

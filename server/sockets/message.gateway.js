@@ -35,26 +35,22 @@ export function registerChatHandlers(io, socket) {
 
       const thread = await threadRepo.getThreadById(threadId);
       if (!thread) return;
-
+      console.log("user ",socket.user);
+      console.log("thread info ",thread);
+      console.log("check",socket.user.id ,thread.supplierUserId);
+      
        const receiverId =
-        socket.userId.toString() === thread.supplierUserId.toString()
-          ? thread.userId      // שולח הוא הספק → שולחים למשתמש
+        socket.user.id === thread.supplierUserId.toString()
+          ? thread.userId     // שולח הוא הספק → שולחים למשתמש
           : thread.supplierUserId; // שולח הוא המשתמש → שולחים לספק
 
-       const message = await messageService.sendMessage({
+       const newMsg = await messageService.sendMessage({
         threadId,
         from: socket.user.id,
         to: receiverId,
         body: body.trim(),
       });     
       // אם לא סופק to, קובע לפי thread
-     
-      const newMsg = await messageService.sendMessage({
-        threadId,
-        from: socket.user.id,
-        to,
-        body,
-      });
 
       io.to(threadId).emit("new_message", newMsg);
     } catch (err) {
