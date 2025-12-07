@@ -16,16 +16,26 @@ export function initSocket(server) {
   });
 
   // ---- JWT MIDDLEWARE ----
-  io.use((socket, next) => {
-    const token = socket.handshake.auth?.token;
-    if (!token) return next(new Error("Unauthorized"));
+io.use((socket, next) => {
+  console.log("auth object:", socket.handshake.auth);
 
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-      if (err) return next(new Error("Unauthorized"));
-      socket.user = decoded;
-      next();
-    });
+  const token = socket.handshake.auth.token;
+  if (!token) {
+    console.log("No token received");
+    return next(new Error("Unauthorized"));
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      console.log("JWT verify failed:", err.message);
+      return next(new Error("Unauthorized"));
+    }
+    console.log("JWT decoded:", decoded);
+    socket.user = decoded;
+    next();
   });
+});
+
 
   // ---- CONNECTION ----
   io.on("connection", socket => {

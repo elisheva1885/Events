@@ -27,33 +27,28 @@ export function registerChatHandlers(io, socket) {
   });
 
   // שליחת הודעה חדשה
-  socket.on("send_message", async (payload) => {
+  socket.on("send_message", async ({ threadId, body }) => {
     try {
-      const { threadId, to: maybeTo, body } = payload || {};
-      if (!threadId || !body) {
+      if (!threadId || !body || !socket.user.id) {
         return socket.emit("error", { message: "Invalid message payload" });
       }
 
-      let to = maybeTo;
+      const thread = await threadRepo.getThreadById(threadId);
+      if (!thread) return;
 
+       const receiverId =
+        socket.userId.toString() === thread.supplierUserId.toString()
+          ? thread.userId      // שולח הוא הספק → שולחים למשתמש
+          : thread.supplierUserId; // שולח הוא המשתמש → שולחים לספק
+
+       const message = await messageService.sendMessage({
+        threadId,
+        from: socket.user.id,
+        to: receiverId,
+        body: body.trim(),
+      });     
       // אם לא סופק to, קובע לפי thread
-      if (!to) {
-        const thread = await threadRepo.getThreadWithParticipants(threadId);
-        if (!thread) return socket.emit("error", { message: "Thread not found" });
-
-        const senderId = String(socket.user.id);
-        const threadUserId = thread.userId ? String(thread.userId._id || thread.userId) : null;
-        const supplierUserId = thread.supplierId?.user ? String(thread.supplierId.user._id || thread.supplierId.user) : null;
-
-        if (threadUserId && senderId === threadUserId) {
-          to = supplierUserId;
-        } else {
-          to = threadUserId;
-        }
-      }
-
-      if (!to) return socket.emit("error", { message: "Could not determine recipient" });
-
+     
       const newMsg = await messageService.sendMessage({
         threadId,
         from: socket.user.id,

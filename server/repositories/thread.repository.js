@@ -1,7 +1,7 @@
 import Thread from "../models/threads.model.js";
 
-export async function createThread({ requestId, userId, supplierId }) {
-  return await Thread.create({ requestId, userId, supplierId });
+export async function createThread({ requestId, userId, supplierId, supplierUserId }) {
+  return await Thread.create({ requestId, userId, supplierId,supplierUserId });
 }
 
 export async function getThreadByRequestId(requestId) {

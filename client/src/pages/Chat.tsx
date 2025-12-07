@@ -30,16 +30,19 @@ export default function Chat() {
   // Initialize socket
   useEffect(() => {
     if (!user) return;
-    const s = getSocket(token);
-    setSocketInstance(s);
+    if (!token) return; // בודק null ו־undefined
+    const socket = getSocket(token);
+    console.log({socket , token});
+    
+    setSocketInstance(socket);
 
     const handler = (msg: any) => {
       dispatch({ type: "chat/appendMessage", payload: msg });
     };
-    s.on("new_message", handler);
+    socket.on("new_message", handler);
 
     return () => {
-      s.off("new_message", handler);
+      socket.off("new_message", handler);
     };
   }, [user, token, dispatch]);
 
@@ -110,22 +113,23 @@ export default function Chat() {
   }, [conversationMessages]);
 
   // Send message
+  // בתוך handleSendMessage
   const handleSendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    console.log("aaaaaaaaa ", messageText.trim(), selectedThreadId, user, socketInstance);
 
     if (!messageText.trim() || !selectedThreadId || !user || !socketInstance) return;
+    console.log("message: ", messageText);
 
     const thread = safeThreads.find(t => t._id === selectedThreadId);
     if (!thread) return;
-    const receiverId = user.role === "supplier" ? thread.userId : thread.supplierId;
 
     try {
+      // שולחים רק את ה-threadId וה-body
       socketInstance.emit("send_message", {
         threadId: selectedThreadId,
-        to: receiverId,
         body: messageText.trim(),
       });
+
       setDebugLog((s) => [...s, `sent: ${messageText.trim()}`]);
       setMessageText("");
     } catch {
@@ -133,6 +137,7 @@ export default function Chat() {
       setDebugLog((s) => [...s, `send failed: ${messageText.trim()}`]);
     }
   };
+
 
 
 

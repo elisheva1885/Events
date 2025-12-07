@@ -1,26 +1,30 @@
+// services/auth.ts
 import { store } from "../store";
-import type { AuthResponse, RegisterData } from "../types/AuthTypes";
 import api from "./axios";
 
-// Interface עבור נתוני משתמש
+// -----------------------------
+// Interfaces
+// -----------------------------
 export interface User {
   id: string;
   name: string;
   email: string;
   phone?: string;
+  role?: string;
 }
 
-// Interface עבור תשובת התחברות/הרשמה
-
-// Interface עבור נתוני התחברות
 export interface LoginData {
   email: string;
   password: string;
 }
 
+export interface RegisterData {
+  name: string;
+  email: string;
+  password: string;
+  phone?: string;
+}
 
-
-// Interface עבור נתוני Google Auth
 export interface GoogleAuthData {
   email: string;
   name: string;
@@ -28,97 +32,101 @@ export interface GoogleAuthData {
   picture?: string;
 }
 
-// פונקציית התחברות
+export interface AuthResponse {
+  success: boolean;
+  user?: User;
+}
+
+// -----------------------------
+// Login
+// -----------------------------
 export const login = async (data: LoginData): Promise<AuthResponse> => {
   try {
-    const response = await api.post("/auth/login", data);
-    console.log(response);
+    const response = await api.post("/auth/login", data, { withCredentials: true });
     return response.data;
-  }
-    
-   catch (error: any) {
-    // טיפול בשגיאות
-     if (error.response?.data?.message) {
-      throw new Error(error.response.data.message);
-    }
+  } catch (error: any) {
+    if (error.response?.data?.message) throw new Error(error.response.data.message);
     throw new Error("שגיאה בהתחברות");
   }
 };
 
-// פונקציית הרשמה
+// -----------------------------
+// Register
+// -----------------------------
 export const register = async (
   data: RegisterData & Partial<{ category: string; regions: string; kashrut: string; description: string }>,
   role: string
 ): Promise<AuthResponse> => {
   try {
-    console.log("Sending registration data:", data);
-
-    const route = role === "supplier" ? "suppliers/register" : "auth/register";
-
-    // אם ספק – שולחים את כל השדות, כולל שדות המשתמש
-    const payload =
-      role === "supplier"
-        ? { ...data, role: "supplier" } // שולחים את כל השדות במבנה אחד
-        : data; // למשתמש רגיל שולחים רק את השדות הבסיסיים
-
-    const response = await api.post(route, payload);
-    console.log("Server response:", response.data);
+    const route = role === "supplier" ? "/suppliers/register" : "/auth/register";
+    const payload = role === "supplier" ? { ...data, role: "supplier" } : data;
+    const response = await api.post(route, payload, { withCredentials: true });
     return response.data;
   } catch (error: any) {
-    if (error.response?.data?.message) {
-      throw new Error(error.response.data.message);
-    }
+    if (error.response?.data?.message) throw new Error(error.response.data.message);
     throw new Error("שגיאה בהרשמה");
   }
 };
 
-
-
-// פונקציית התנתקות
-export const logout = async() => {
-  await api.post("/auth/logout");
-
+// -----------------------------
+// Logout
+// -----------------------------
+export const logout = async (): Promise<void> => {
+  await api.post("/auth/logout", {}, { withCredentials: true });
+  store.dispatch({ type: "auth/clearUser" });
 };
 
+// -----------------------------
+// Fetch Current User
+// -----------------------------
+export const fetchUser = async (): Promise<User> => {
+  const res = await api.get("/users/me", { withCredentials: true });
+  return res.data;
+};
 
-
-// בדיקה סינכרונית - בודק אם יש טוקן
+// -----------------------------
+// Authentication Checks
+// -----------------------------
 export const isAuthenticated = (): boolean => {
   const state = store.getState();
-  return !!state.auth.token;
+  return !!state.auth.user;
 };
 
-// בדיקה אסינכרונית - אם צריך לוודא מול השרת
 export const isAuthenticatedAsync = async (): Promise<boolean> => {
   try {
-    await api.get("/users/me"); 
+    await api.get("/users/me", { withCredentials: true });
     return true;
   } catch {
     return false;
   }
 };
 
-// פונקציה סינכרונית לקבלת תפקיד המשתמש מה-Redux store
+// -----------------------------
+// Get User Role
+// -----------------------------
 export const getUserRole = (): string | null => {
   const state = store.getState();
   return state.auth.user?.role || null;
 };
 
-// פונקציה אסינכרונית לקבלת תפקיד המשתמש מהשרת
-export const getUserRoleAsync = async () => {
-  const res = await api.get("/users/me");  
-  return res.data.role;
+export const getUserRoleAsync = async (): Promise<string | null> => {
+  try {
+    const res = await api.get("/users/me", { withCredentials: true });
+    return res.data.role || null;
+  } catch {
+    return null;
+  }
 };
 
-// פונקציית התחברות עם Google
+// -----------------------------
+// Google Auth
+// -----------------------------
 export const googleAuth = async (data: GoogleAuthData): Promise<AuthResponse> => {
   try {
-    const response = await api.post('/auth/google', data);
+    const response = await api.post("/auth/google", data, { withCredentials: true });
     return response.data;
   } catch (error: any) {
-    if (error.response?.data?.message) {
-      throw new Error(error.response.data.message);
-    }
-    throw new Error('שגיאה בהתחברות עם Google. אנא נסה שוב.');
+    if (error.response?.data?.message) throw new Error(error.response.data.message);
+    throw new Error("שגיאה בהתחברות עם Google. אנא נסה שוב.");
   }
 };
