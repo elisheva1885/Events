@@ -1,6 +1,7 @@
 // services/auth.ts
 import { store } from "../store";
 import api from "./axios";
+import type { AuthResponse, RegisterData } from "../types/AuthTypes";
 
 // -----------------------------
 // Interfaces
@@ -18,13 +19,6 @@ export interface LoginData {
   password: string;
 }
 
-export interface RegisterData {
-  name: string;
-  email: string;
-  password: string;
-  phone?: string;
-}
-
 export interface GoogleAuthData {
   email: string;
   name: string;
@@ -32,20 +26,22 @@ export interface GoogleAuthData {
   picture?: string;
 }
 
-export interface AuthResponse {
-  success: boolean;
-  user?: User;
-}
+
 
 // -----------------------------
 // Login
-// -----------------------------
 export const login = async (data: LoginData): Promise<AuthResponse> => {
   try {
-    const response = await api.post("/auth/login", data, { withCredentials: true });
+    const response = await api.post("/auth/login", data);
+    console.log(response);
     return response.data;
-  } catch (error: any) {
-    if (error.response?.data?.message) throw new Error(error.response.data.message);
+  }
+    
+   catch (error: any) {
+    // טיפול בשגיאות
+     if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    }
     throw new Error("שגיאה בהתחברות");
   }
 };
@@ -60,10 +56,10 @@ export const register = async (
   try {
     const route = role === "supplier" ? "/suppliers/register" : "/auth/register";
     const payload = role === "supplier" ? { ...data, role: "supplier" } : data;
-    const response = await api.post(route, payload, { withCredentials: true });
+    const response = await api.post(route, payload);
     return response.data;
   } catch (error: any) {
-    if (error.response?.data?.message) throw new Error(error.response.data.message);
+    if (error.response.data.message) throw new Error(error.response.data.message);
     throw new Error("שגיאה בהרשמה");
   }
 };
@@ -71,10 +67,11 @@ export const register = async (
 // -----------------------------
 // Logout
 // -----------------------------
-export const logout = async (): Promise<void> => {
-  await api.post("/auth/logout", {}, { withCredentials: true });
-  store.dispatch({ type: "auth/clearUser" });
+export const logout = async() => {
+  await api.post("/auth/logout");
 };
+
+
 
 // -----------------------------
 // Fetch Current User
@@ -87,14 +84,11 @@ export const fetchUser = async (): Promise<User> => {
 // -----------------------------
 // Authentication Checks
 // -----------------------------
-export const isAuthenticated = (): boolean => {
-  const state = store.getState();
-  return !!state.auth.user;
-};
+
 
 export const isAuthenticatedAsync = async (): Promise<boolean> => {
   try {
-    await api.get("/users/me", { withCredentials: true });
+    await api.get("/users/me");
     return true;
   } catch {
     return false;
@@ -104,29 +98,23 @@ export const isAuthenticatedAsync = async (): Promise<boolean> => {
 // -----------------------------
 // Get User Role
 // -----------------------------
-export const getUserRole = (): string | null => {
-  const state = store.getState();
-  return state.auth.user?.role || null;
+export const getUserRole = async () => {
+  const res = await api.get("/users/me");  
+  return res.data.role;
 };
 
-export const getUserRoleAsync = async (): Promise<string | null> => {
-  try {
-    const res = await api.get("/users/me", { withCredentials: true });
-    return res.data.role || null;
-  } catch {
-    return null;
-  }
-};
 
 // -----------------------------
 // Google Auth
 // -----------------------------
 export const googleAuth = async (data: GoogleAuthData): Promise<AuthResponse> => {
   try {
-    const response = await api.post("/auth/google", data, { withCredentials: true });
+    const response = await api.post('/auth/google', data);
     return response.data;
   } catch (error: any) {
-    if (error.response?.data?.message) throw new Error(error.response.data.message);
-    throw new Error("שגיאה בהתחברות עם Google. אנא נסה שוב.");
+    if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    }
+    throw new Error('שגיאה בהתחברות עם Google. אנא נסה שוב.');
   }
 };

@@ -1,4 +1,5 @@
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
 import io, { Socket } from "socket.io-client";
 import api from "../services/axios";
 import type { Message } from "../types/Message";
@@ -25,7 +26,7 @@ const initialState: ChatState = {
 // ===========================
 // SOCKET INIT (GLOBAL CACHE)
 // ===========================
-let socket: Socket | null = null;
+let socket: Socket | undefined;
 
 // ===========================
 // THUNKS
@@ -40,8 +41,11 @@ export const fetchThreads = createAsyncThunk<
     const { data } = await api.get(url);
     // data כבר מכיל fields: _id, userId, supplierId, supplierName, clientName, eventName, status, hasUnread
     return data;
-  } catch (err: any) {
+  } catch (err) {
+  if (err instanceof Error) {
     return thunkAPI.rejectWithValue(err.message);
+  }
+    return thunkAPI.rejectWithValue("שגיאה לא ידועה");
   }
 });
 
@@ -54,24 +58,14 @@ export const fetchMessages = createAsyncThunk<
   try {
     const { data } = await api.get(`/messages/${threadId}`);
     return data;
-  } catch (err: any) {
+  } catch (err) {
+  if (err instanceof Error) {
     return thunkAPI.rejectWithValue(err.message);
+  }
+    return thunkAPI.rejectWithValue("שגיאה לא ידועה");
   }
 });
 
-// שליחת הודעה דרך REST (ברגע שתרצי — אפשר להפוך ל־socket emit)
-// export const sendMessage = createAsyncThunk<
-//   Message,
-//   { threadId: string; body: string },
-//   { rejectValue: string; state: RootState }
-// >("chat/sendMessage", async ({ threadId, body }, thunkAPI) => {
-//   try {
-//     const { data } = await api.post(`/messages`, { threadId, body });
-//     return data;
-//   } catch (err: any) {
-//     return thunkAPI.rejectWithValue(err.message);
-//   }
-// });
 
 // ===========================
 // SLICE
@@ -118,22 +112,17 @@ const chatSlice = createSlice({
         }
       })
 
-      // .addCase(sendMessage.fulfilled, (state, action) => {
-      //   const msg = action.payload;
-      //   const tid = msg.threadId;
-
-      //   if (!state.messagesByThread[tid]) {
-      //     state.messagesByThread[tid] = [];
-      //   }
-      //   state.messagesByThread[tid].push(msg);
-      // });
   },
 });
 
 // ===========================
 // SOCKET SETUP FUNCTION
 // ===========================
-export const initChatSocket = (token: string, getState: () => RootState, dispatch: any) => {
+export const initChatSocket = (
+  token: string,
+  getState: () => RootState,
+  dispatch: (a: unknown) => void
+) => {
   if (socket) return socket;
 
   socket = io("http://localhost:3000", {
@@ -141,24 +130,21 @@ export const initChatSocket = (token: string, getState: () => RootState, dispatc
     transports: ["websocket"],
   });
 
-  // --- CONNECT ---
   socket.on("connect", () => {
     const active = getState().chat.activeThreadId;
-    if (active) socket.emit("join_thread", active);
+    if (active) socket!.emit("join_thread", active);
   });
 
   socket.on("reconnect", () => {
     const active = getState().chat.activeThreadId;
-    if (active) socket.emit("join_thread", active);
+    if (active) socket!.emit("join_thread", active);
   });
 
-  // --- NEW MESSAGE ---
   socket.on("new_message", (msg: Message) => {
-    console.log("SOCKET new_message:", msg);
     dispatch(appendMessage(msg));
   });
 
-  (globalThis as any).__chat_socket = socket;
+globalThis.__chat_socket = socket;
 
   return socket;
 };

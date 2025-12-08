@@ -12,12 +12,12 @@ import { Avatar, AvatarFallback } from "../components/ui/avatar";
 import { formatMessageTime } from "../Utils/DataUtils";
 import type { Thread } from "../types/Thread";
 import { getSocket } from "../services/socket";
+import type { Message } from "@/types/Message";
 
 export default function Chat() {
   const dispatch = useDispatch<AppDispatch>();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const user = useSelector((state: RootState) => state.auth.user);
-  const token = useSelector((state: RootState) => state.auth.token);
   const threads = useSelector((state: RootState) => state.chat.threads ?? []);
   const messagesByThread = useSelector((state: RootState) => state.chat.messagesByThread ?? {});
 
@@ -29,21 +29,21 @@ export default function Chat() {
 
   // Initialize socket
   useEffect(() => {
-    console.log("useEffect runs", { user, token });
+    console.log("useEffect runs", { user });
 
     const socket = getSocket();
 
     const handleConnect = () => {
       console.log("Socket connected:", socket.id);
       console.log("selectedThreadId", selectedThreadId);
-      
+
       // אם יש thread שנבחר, הצטרף אליו מיד
       if (selectedThreadId) {
         socket.emit("join_thread", selectedThreadId);
       }
     };
 
-    const handleNewMessage = (msg: any) => {
+    const handleNewMessage = (msg: Message) => {
       dispatch({ type: "chat/appendMessage", payload: msg });
     };
 
@@ -57,7 +57,7 @@ export default function Chat() {
       socket.off("new_message", handleNewMessage);
       socket.disconnect();
     };
-  }, [user, token, dispatch, selectedThreadId]);
+  }, [user, dispatch, selectedThreadId]);
 
   // Fetch threads on load
   useEffect(() => {
@@ -107,16 +107,23 @@ export default function Chat() {
     const messages = messagesByThread[selectedThreadId];
     if (!Array.isArray(messages)) return [];
     return messages
-      .map((m, idx) => ({
-        ...m,
-        _id: m._id?.toString() || `msg-${idx}`,
-        threadId: m.threadId?.toString() || selectedThreadId,
-        from: (m as any).from || "",
-        to: (m as any).to || "",
-        createdAt: typeof (m as any).createdAt === "string"
-          ? (m as any).createdAt
-          : ((m as any).createdAt ? new Date((m as any).createdAt).toISOString() : new Date().toISOString()),
-      }))
+      .map((m: Message, idx) => {
+        const created =
+          typeof m.createdAt === "string"
+            ? m.createdAt
+            : m.createdAt
+              ? m.createdAt.toISOString()
+              : new Date().toISOString();
+
+        return {
+          ...m,
+          _id: m._id?.toString() || `msg-${idx}`,
+          threadId: m.threadId?.toString() || selectedThreadId,
+          from: m.from,
+          to: m.to,
+          createdAt: created,
+        };
+      })
       .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
   }, [messagesByThread, selectedThreadId]);
 
@@ -143,7 +150,7 @@ export default function Chat() {
         body: messageText.trim(),
       });
       console.log("after sending");
-      
+
       setDebugLog((s) => [...s, `sent: ${messageText.trim()}`]);
       setMessageText("");
     } catch {

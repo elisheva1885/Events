@@ -77,38 +77,35 @@ export function UserRegisterForm({ onRegister, onRoleChange, currentRole }: Prop
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const newErrors: any = {
+    const newErrors = {
       name: validateName(formData.name),
       email: validateEmail(formData.email),
       phone: validatePhone(formData.phone),
       password: validatePassword(formData.password),
-      confirmPassword: validateConfirmPassword(formData.password, formData.confirmPassword),
-      agreedTerms: !formData.agreedTerms ? "יש לאשר את תנאי השימוש" : "",
+      confirmPassword: validateConfirmPassword(
+        formData.password,
+        formData.confirmPassword
+      ),
+      agreedTerms: formData.agreedTerms ? "" : "יש לאשר את תנאי השימוש",
     };
-
-    const hasErrors = Object.values(newErrors).some(Boolean);
-    if (hasErrors) {
+    if (Object.values(newErrors).some(Boolean)) {
       setErrors(newErrors);
       return;
     }
-
     setLoading(true);
-    const formDataServer = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        password: formData.password   
-    }
+    const { name, email, phone, password } = formData;
     try {
-      await register(formDataServer, "user");
+      await register({ name, email, phone, password }, "user");
       onRegister();
     } catch (err: any) {
-      setErrors({ general: err?.response?.data?.message || "שגיאה בהרשמה" });
+      setErrors({
+        general: err?.response?.data?.message || "שגיאה בהרשמה",
+      });
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <form
@@ -132,22 +129,20 @@ export function UserRegisterForm({ onRegister, onRoleChange, currentRole }: Prop
         <button
           type="button"
           onClick={() => onRoleChange("user")}
-          className={`flex-1 sm:flex-none sm:px-6 py-2.5 rounded-xl border text-xs sm:text-sm font-light transition-all ${
-            currentRole === "user"
-              ? "bg-[#d4a960] text-white border-[#d4a960] shadow-sm"
-              : "border-[#d4a960] text-[#2d2d35] hover:bg-[#d4a960]/10"
-          }`}
+          className={`flex-1 sm:flex-none sm:px-6 py-2.5 rounded-xl border text-xs sm:text-sm font-light transition-all ${currentRole === "user"
+            ? "bg-[#d4a960] text-white border-[#d4a960] shadow-sm"
+            : "border-[#d4a960] text-[#2d2d35] hover:bg-[#d4a960]/10"
+            }`}
         >
           משתמש רגיל
         </button>
         <button
           type="button"
           onClick={() => onRoleChange("supplier")}
-          className={`flex-1 sm:flex-none sm:px-6 py-2.5 rounded-xl border text-xs sm:text-sm font-light transition-all ${
-            currentRole === "supplier"
-              ? "bg-[#d4a960] text-white border-[#d4a960] shadow-sm"
-              : "border-[#d4a960] text-[#2d2d35] hover:bg-[#d4a960]/10"
-          }`}
+          className={`flex-1 sm:flex-none sm:px-6 py-2.5 rounded-xl border text-xs sm:text-sm font-light transition-all ${currentRole === "supplier"
+            ? "bg-[#d4a960] text-white border-[#d4a960] shadow-sm"
+            : "border-[#d4a960] text-[#2d2d35] hover:bg-[#d4a960]/10"
+            }`}
         >
           ספק
         </button>
@@ -233,9 +228,9 @@ export function UserRegisterForm({ onRegister, onRoleChange, currentRole }: Prop
       </div>
       {errors.agreedTerms && <p className="text-xs text-red-500">{errors.agreedTerms}</p>}
 
-      <button 
-        type="submit" 
-        disabled={loading} 
+      <button
+        type="submit"
+        disabled={loading}
         className="w-full h-14 bg-[#d4a960] hover:bg-[#c89645] text-white rounded-2xl font-light text-base transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
       >
         {loading ? "נרשם..." : "הירשם למערכת"}

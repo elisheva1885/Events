@@ -2,6 +2,7 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
 import type { Event } from '../types/type';
 import api from '../services/axios';
+import { AxiosError } from 'axios';
 
 export interface EventState {
   eventsList: Event[];
@@ -91,12 +92,24 @@ export const updateEvent = createAsyncThunk<
       data
     );
 
-    console.log('🔍 SERVER RAW RESPONSE:', res.data);
 
     return res.data.data;
-  } catch (err: any) {
-    return rejectWithValue(err.response?.data?.message || 'Error updating');
+  } catch (err: unknown) {
+  // אם זו שגיאת Axios
+  if (err instanceof AxiosError) {
+    return rejectWithValue(
+      err.response?.data?.message || "שגיאה בעדכון"
+    );
   }
+
+  // אם זו שגיאה רגילה
+  if (err instanceof Error) {
+    return rejectWithValue(`שגיאה: ${err.message}`);
+  }
+
+  // ברירת מחדל
+  return rejectWithValue("שגיאה לא צפויה בעדכון");
+}
 });
 
 // 🔹 מחיקת אירוע
