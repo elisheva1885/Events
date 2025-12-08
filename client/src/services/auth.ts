@@ -33,13 +33,10 @@ export interface GoogleAuthData {
 export const login = async (data: LoginData): Promise<AuthResponse> => {
   try {
     const response = await api.post("/auth/login", data);
-    console.log(response);
     return response.data;
   }
     
-   catch (error: unknown) {
-    // טיפול בשגיאות
-   
+   catch (error: unknown) {   
     throw new Error(getErrorMessage(error,"שגיאה בהתחברות"));
   }
 };
