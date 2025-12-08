@@ -89,15 +89,9 @@ export default function AppRouter() {
     else if (page === "register") navigate("/register");
   };
 
-  const handleLoginAndRegister = async () => {
-    console.log("User logged in");
-    
-    // טוען את פרטי המשתמש לפני ניווט
+  const handleLoginAndRegister = async () => {    
     await dispatch(fetchUser());
-    
-    // מקבל את ה-role מהשרת
-    const userRole =  getUserRole();
-    
+    const userRole = await getUserRole();
     if (userRole === 'admin') {
       navigate("/admin/dashboard");
     } else if (userRole === 'supplier') {      
