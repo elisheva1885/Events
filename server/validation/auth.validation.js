@@ -35,9 +35,14 @@ export const registerSchema = Joi.object({
   name: Joi.string().min(3).max(50).required().messages(nameMessages),
   email: Joi.string().email().required().messages(emailMessages),
   phone: Joi.string()
-    .pattern(/^05\d{8}$/) // חייב להתחיל ב 05 ואחריו 8 ספרות → סה"כ 10 ספרות
+    .pattern(/^(05\d{8}|0\d{1,2}\d{7})$/)
     .required()
-    .messages(phoneMessages),
+    .messages({
+      'string.empty': 'מספר טלפון הוא שדה חובה',
+      'string.pattern.base':
+        'מספר טלפון חייב להיות תקין (05XXXXXXXX או מספר נייח כגון 03XXXXXXX)',
+      'any.required': 'מספר טלפון הוא שדה חובה'
+    }),
   password: Joi.string()
     .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$'))
     .required()

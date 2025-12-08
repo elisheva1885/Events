@@ -18,15 +18,15 @@ import {
 } from "../../components/ui/select";
 import { useDispatch, useSelector } from "react-redux";
 import type { Supplier } from "../../types/Supplier";
-import type { Event } from "../../types/type";
+import type { Event } from "../../types/Event";
 import type { AppDispatch, RootState } from "../../store";
-import { fetchEvents, fetchRelevantEvents } from "../../store/eventsSlice";
+import { fetchRelevantEvents } from "../../store/eventsSlice";
 
 interface SendRequestDialogProps {
   supplier: Supplier;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: { eventId: string;  requestMessage: string ;supplierId: string;}) => Promise<any>;
+  onSubmit: (data: { eventId: string; requestMessage: string; supplierId: string }) => Promise<void>;
   isLoading: boolean;
   isSending:boolean
 }
@@ -51,7 +51,7 @@ export const SendRequestDialog = ({
 
   useEffect(() => {
     dispatch(fetchRelevantEvents());    
-  }, []);
+  }, [dispatch]);
 
   // בחירת אירוע ראשון אוטומטית
   useEffect(() => {
@@ -70,6 +70,8 @@ export const SendRequestDialog = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    console.log('📤 Sending request:', { eventId, requestMessage, supplierId });
     
     await onSubmit({
       eventId,
@@ -108,13 +110,14 @@ export const SendRequestDialog = ({
 
           {/* הודעה לספק */}
           <div className="space-y-2">
-            <Label>הודעה לספק</Label>
+            <Label>הודעה לספק (לפחות 5 תווים)</Label>
             <Textarea
               value={requestMessage}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setRequestMessage(e.target.value)}
-              placeholder="כתוב הודעה לספק..."
+              placeholder="כתוב הודעה לספק (לפחות 5 תווים)..."
               rows={4}
               required
+              minLength={5}
             />
           </div>
 

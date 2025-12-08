@@ -12,11 +12,12 @@ import { PendingSuppliersPage } from "./pages/admin/PendingSuppliersPage";
 import { ActiveSuppliersPage } from "./pages/admin/ActiveSuppliersPage";
 import { SupplierDetailsPage } from "./pages/admin/SupplierDetailsPage";
 import { UsersPage } from "./pages/admin/UsersPage";
+import { EventsPage } from "./pages/admin/EventsPage";
 import { getUserRole } from "./services/auth";
 import type { AppRoute } from "./types/AppRouter";
 import SupplierDashboard from "./pages/Supplier/SupplierDashboard";
 import { RequestPage } from "./pages/RequestPage";
-import { Calendar, FileText, LayoutDashboard, Send, Store ,Wallet,BellIcon,MessageSquare} from "lucide-react";
+import { Calendar, LayoutDashboard, Send, Store ,Wallet,BellIcon,MessageSquare} from "lucide-react";
 import SupplierRequestPage from "./pages/Supplier/SupplierRequestPage";
 import SupplierContractsPage from "./pages/Supplier/SupplierContractsPage";
 import ContractsPage from "./pages/ContractsPage";
@@ -155,6 +156,14 @@ export default function AppRouter() {
         element={
           <ProtectedRoute requiredRole="admin">
             <UsersPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/events"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <EventsPage />
           </ProtectedRoute>
         }
       />
