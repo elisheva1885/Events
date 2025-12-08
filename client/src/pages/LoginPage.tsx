@@ -16,21 +16,29 @@ export function LoginPage({ onLogin, onNavigate }: LoginPageProps) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      await login({ email, password });
-      onLogin(); 
-    } catch (err) {
-      const errorMessage =getErrorMessage(err, 'שגיאה בהתחברות. אנא נסה שוב.')
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError('');
+  setLoading(true);
+
+  try {
+    const response = await login({ email, password });
+    // שמירת הטוקן ב-localStorage
+    if (response.token) {
+      localStorage.setItem('token', response.token);
     }
-  };
+    onLogin();
+  } catch (err: any) {
+    setError(
+      err.response?.data?.message ||
+      err.message ||
+      'שגיאה בהתחברות. אנא נסה שוב.'
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 relative bg-gradient-to-br from-[#faf8f3] to-white">
