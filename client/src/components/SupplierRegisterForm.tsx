@@ -172,9 +172,9 @@ await register(
 );
 
       setStep(2); // עבור ספקים עוברים לשלב הבא
-    } catch (err: any) {
+    } catch (err) {
       setErrors({
-        general: err?.response?.data?.message || "שגיאה בהרשמה",
+        general: getErrorMessage(err, "שגיאה בהרשמה"),
       });
     } finally {
       setLoading(false);

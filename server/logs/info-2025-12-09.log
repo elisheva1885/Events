@@ -1,0 +1,11 @@
+[2025-12-08T22:35:57.710Z] [INFO] [210ae328-7755-4c00-82e5-29cefb769f0d] GET /api/users/me - Request finished with status 304
+[2025-12-08T22:35:57.841Z] [INFO] [2884c96b-3319-431d-862e-bc98f78ddfb9] GET /api/users/me - Request finished with status 304
+[2025-12-08T22:35:57.920Z] [INFO] [cafc858f-bd5c-4a81-b29e-92006c635f53] GET /api/users/me - Request finished with status 304
+[2025-12-08T22:35:58.003Z] [INFO] [a3276d56-0df9-4a8f-a64a-bed3718feea6] GET /api/users/me - Request finished with status 304
+[2025-12-08T22:35:58.091Z] [INFO] [b4722792-9cd7-42b4-a7c0-f91da18618e5] GET /api/users/me - Request finished with status 304
+[2025-12-08T22:35:58.166Z] [INFO] [20e065e7-a313-45db-8900-63fc2d839354] GET /api/users/me - Request finished with status 304
+[2025-12-08T22:35:58.306Z] [INFO] [a6f4a1d5-9bc2-481e-90ca-5a264d010673] GET /api/notifications - Request finished with status 201
+[2025-12-08T22:35:59.694Z] [INFO] [a0e2f3ba-f4c2-43ca-af92-8d305bfe6e1b] GET /api/dashboard/supplier/charts - Request finished with status 304
+[2025-12-08T22:35:59.773Z] [INFO] [278b2774-c542-42e4-9a69-9a1ae044d934] GET /api/dashboard/summarySupplier - Request finished with status 200
+[2025-12-08T22:36:00.458Z] [INFO] [b8ab89c3-fdbf-458e-a6b1-6f88ff505f4f] GET /api/dashboard/supplier/charts - Request finished with status 304
+[2025-12-08T22:36:01.173Z] [INFO] [aadde2f9-93c3-4839-9b47-d7532c14850d] GET /api/dashboard/summarySupplier - Request finished with status 304

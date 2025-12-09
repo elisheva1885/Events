@@ -143,7 +143,7 @@ export default function Dashboard() {
   
   useEffect(() => {
     dispatch(fetchDashboardSummaryUser());
-    // dispatch(fetchDashboardChartsUser()); // Uncomment if needed
+    dispatch(fetchDashboardChartsUser()); 
   }, [dispatch]);
 
   const upcomingFirst: Event | null = upcomingEvent?.[0] || null;

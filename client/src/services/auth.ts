@@ -1,5 +1,4 @@
 import { getErrorMessage } from "@/Utils/error";
-import { store } from "../store";
 import api from "./axios";
 import type { AuthResponse, RegisterData } from "../types/AuthTypes";
 
@@ -45,7 +44,7 @@ export const login = async (data: LoginData): Promise<AuthResponse> => {
 // Register
 // -----------------------------
 export const register = async (
-  data: RegisterData & Partial<{ category: string; regions: string; kashrut: string; description: string }>,
+  data: RegisterData & Partial<{ category: string; regions: string[]; kashrut: string; description: string }>,
   role: string
 ): Promise<AuthResponse> => {
   try {
