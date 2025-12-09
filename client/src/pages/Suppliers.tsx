@@ -29,6 +29,7 @@ import { createSupplierRequest } from "../store/supplierRequestsSlice";
 import { Badge } from "../components/ui/badge";
 import { SendRequestDialog } from "../components/Request/SendRequestDialog";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/Utils/error";
 
 export default function Suppliers() {
   const dispatch: AppDispatch = useDispatch();
@@ -108,9 +109,9 @@ export default function Suppliers() {
       toast.success("הבקשה נשלחה בהצלחה");
       dispatch(clearSelectedSupplier());
       setSendRequest(false);
-     } catch (err:any) {
+     } catch (err:unknown) {
        console.error("❌ Error sending request:", err);
-       toast.error(typeof err === 'string' ? err : err.message || "שגיאה בשליחת הבקשה");
+       toast.error(getErrorMessage(err,"שגיאה בשליחת הבקשה"));
      } finally {
        setIsSending(false);
      }

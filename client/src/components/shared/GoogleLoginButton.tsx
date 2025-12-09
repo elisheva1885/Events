@@ -1,6 +1,7 @@
 import { useGoogleLogin } from '@react-oauth/google';
 import { useState } from 'react';
 import { googleAuth } from '../../services/auth';
+import { getErrorMessage } from '@/Utils/error';
 
 interface GoogleLoginButtonProps {
   onSuccess: () => void;
@@ -36,8 +37,8 @@ export function GoogleLoginButton({ onSuccess, onError, mode = 'login' }: Google
         }
         
         onSuccess();
-      } catch (err: any) {
-        const errorMessage = err.response?.data?.message || 'שגיאה בהתחברות עם Google';
+      } catch (err) {
+        const errorMessage = getErrorMessage(err, 'שגיאה בהתחברות עם Google');
         onError(errorMessage);
       } finally {
         setLoading(false);
