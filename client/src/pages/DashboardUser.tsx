@@ -1,0 +1,444 @@
+import { useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
+import {
+  Calendar,
+  Send,
+  DollarSign,
+  FileText,
+  AlertCircle,
+  Bell,
+  ArrowLeft,
+  CheckCircle,
+} from "lucide-react";
+
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../store";
+import type { Notification } from "../types/Notification";
+import type { Event } from "../types/Event";
+
+import {
+  formatRelativeTime,
+  getNotificationColor,
+  getNotificationIcon,
+} from "../Utils/NotificationUtils";
+import { formatEventDate } from "../Utils/DataUtils";
+
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  PieChart,
+  Pie,
+  Legend,
+  Cell,
+} from "recharts";
+import {
+  fetchDashboardChartsUser,
+  fetchDashboardSummaryUser,
+} from "@/store/dashboardSlice";
+
+// ----- צבע לפי סטטוס לתרשים העוגה ----- //
+function getStatusColor(status: string): string {
+  switch (status) {
+    case "שולם":
+      return "hsl(var(--primary))";
+    case "ממתין":
+      return "hsl(var(--ring))";
+    case "באיחור":
+      return "hsl(var(--destructive))";
+    default:
+      return "hsl(var(--muted))";
+  }
+}
+
+// ----- כרטיס סטטיסטיקה כללי ----- //
+interface StatCardProps {
+  title: string;
+  value: string | number;
+  subtitle?: string;
+  icon: React.ComponentType<{ className?: string }>;
+  actionTo?: string;
+  actionLabel?: string;
+}
+
+function StatCard({
+  title,
+  value,
+  subtitle,
+  icon: Icon,
+  actionTo,
+  actionLabel,
+}: StatCardProps) {
+  return (
+    <Card className="hover:shadow-lg transition-shadow">
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-sm font-medium flex items-center gap-2">
+          <span>{title}</span>
+          <Icon className="h-5 w-5 text-primary" />
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <div className="text-3xl font-bold">{value}</div>
+        {subtitle && (
+          <p className="text-sm text-muted-foreground">{subtitle}</p>
+        )}
+        {actionTo && actionLabel && (
+          <Link to={actionTo}>
+            <Button variant="outline" size="sm" className="mt-2 w-full">
+              {actionLabel}
+            </Button>
+          </Link>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function Dashboard() {
+  const {
+    upcomingEvent,
+    pendingRequestsCount,
+    approvedRequestsCount,
+    activeContractsCount,
+    pendingPaymentsCount,
+    pendingPaymentsTotal,
+    overduePaymentsCount,
+    paymentsByMonth,
+    paymentsByStatus,
+  } = useSelector((state: RootState) => state.dashboard);
+
+  const user = useSelector((state: RootState) => state.auth.user);
+  const dispatch: AppDispatch = useDispatch();
+
+  const notifications = useSelector(
+    (state: RootState) => state.notifications.notifications
+  );
+
+  const recentNotifications = useMemo(() => {
+    if (!notifications) return [];
+    return [...notifications]
+      .sort((a: Notification, b: Notification) => {
+        if (!a.payload.time) return 1;
+        if (!b.payload.time) return -1;
+        return (
+          new Date(b.payload.time).getTime() -
+          new Date(a.payload.time).getTime()
+        );
+      })
+      .slice(0, 3);
+  }, [notifications]);
+  
+  useEffect(() => {
+    dispatch(fetchDashboardSummaryUser());
+    dispatch(fetchDashboardChartsUser()); 
+  }, [dispatch]);
+
+  const upcomingFirst: Event | null = upcomingEvent?.[0] || null;
+
+  const formattedPendingTotal = `₪${pendingPaymentsTotal.toLocaleString(
+    "he-IL"
+  )}`;
+
+  return (
+    <div className="space-y-6" style={{ direction: "rtl" }}>
+      {/* כותרת */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">שלום, {user?.name || "משתמש"}</h1>
+      </div>
+
+      {/* 🔝 שורה עליונה – 3 כרטיסי KPI */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* האירוע הקרוב */}
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <span>האירוע הקרוב</span>
+              <Calendar className="h-5 w-5 text-primary" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {upcomingFirst ? (
+              <>
+                <div className="space-y-1">
+                  <p className="text-xl font-bold">{upcomingFirst.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {upcomingFirst.type}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatEventDate(
+                      upcomingFirst.date && upcomingFirst.date.toString()
+                    )}
+                  </p>
+                </div>
+                <Link to="/my-events">
+                  <Button variant="outline" size="sm" className="mt-2 w-full">
+                    ניהול האירוע
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                אין אירועים קרובים
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* בקשות לספקים */}
+        <StatCard
+          title="בקשות לספקים"
+          value={pendingRequestsCount}
+          subtitle="בקשות שממתינות למענה מספקים"
+          icon={Send}
+          actionTo="/requests"
+          actionLabel="צפה בבקשות"
+        />
+
+        {/* תשלומים פתוחים */}
+        <StatCard
+          title="תשלומים פתוחים"
+          value={pendingPaymentsCount}
+          subtitle={`סה״כ: ${formattedPendingTotal}${
+            overduePaymentsCount ? ` • באיחור: ${overduePaymentsCount}` : ""
+          }`}
+          icon={DollarSign}
+          actionTo="/contracts-payments"
+          actionLabel="ניהול תשלומים"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <StatCard
+          title="חוזים פעילים"
+          value={activeContractsCount}
+          subtitle="ספקים שכבר סגרת איתם"
+          icon={FileText}
+          actionTo="/contracts-payments" // או רוטה אחרת לחוזים
+          actionLabel="צפה בחוזים"
+        />
+
+        <StatCard
+          title="בקשות מאושרות"
+          value={approvedRequestsCount}
+          subtitle="בקשות שספקים כבר אישרו"
+          icon={CheckCircle}
+          actionTo="/requests?status=approved"
+          actionLabel="צפה בבקשות המאושרות"
+        />
+      </div>
+
+      {/* תשלומים באיחור */}
+      {overduePaymentsCount > 0 && (
+        <Card className="border-destructive">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <AlertCircle className="h-5 w-5" />
+              תשלומים באיחור
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm">
+              יש לך {overduePaymentsCount} תשלומים שעברו את מועד הפירעון
+            </p>
+            <Link to={"/contract-payment"}>
+              <Button variant="destructive" className="mt-3">
+                צפה בתשלומים
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-primary" />
+              תשלומים לפי חודש
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="h-72">
+            {paymentsByMonth && paymentsByMonth.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={paymentsByMonth}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="hsl(var(--primary))"
+                  />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip
+                    formatter={(value: number) =>
+                      `₪${value.toLocaleString("he-IL")}`
+                    }
+                  />
+                  <Bar
+                    dataKey="total"
+                    name="סכום ששולם"
+                    fill="hsl(var(--primary))"
+                    radius={[6, 6, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                אין עדיין נתוני תשלומים להצגה.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* תשלומים לפי סטטוס */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              תשלומים לפי סטטוס
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="h-72">
+            {paymentsByStatus && paymentsByStatus.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={paymentsByStatus}
+                    dataKey="count"
+                    nameKey="status"
+                    outerRadius={90}
+                    label
+                  >
+                    {paymentsByStatus.map((item, idx) => (
+                      <Cell
+                        key={item.status + idx}
+                        fill={getStatusColor(item.status)}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                אין מספיק נתוני תשלומים לסטטיסטיקה.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* ציר זמן + התראות */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* ציר זמן אירועים */}
+        <Card>
+          <CardHeader>
+            <CardTitle>ציר זמן אירועים</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {upcomingEvent && upcomingEvent.length > 0 ? (
+              <div className="space-y-4">
+                {upcomingEvent.map((event: Event) => (
+                  <div key={event._id} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <p className="font-medium">{event.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {formatEventDate(event.date && event.date.toString())}{" "}
+                          • {event.locationRegion}
+                        </p>
+                      </div>
+                      <Badge
+                        variant={
+                          event.status === "הושלם"
+                            ? "secondary"
+                            : event.status === "פעיל"
+                            ? "default"
+                            : "outline"
+                        }
+                      >
+                        {event.status}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                אין אירועים עדיין
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* התראות אחרונות */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>התראות אחרונות</CardTitle>
+            <Link to={"/notifications"}>
+              <Button variant="ghost" size="sm">
+                צפה בכל ההתראות
+                <ArrowLeft className="mr-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </CardHeader>
+          <CardContent>
+            {recentNotifications.length > 0 ? (
+              <div className="space-y-3">
+                {recentNotifications.map((notification: Notification) => {
+                  const Icon = getNotificationIcon(notification.type);
+                  const iconColor = getNotificationColor(notification.type);
+                  return (
+                    <div
+                      key={notification.id}
+                      className="p-3 rounded-lg border bg-primary/5"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`p-2 rounded-full ${iconColor}`}>
+                          <Icon className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="font-medium text-sm truncate">
+                              {notification.type}
+                            </p>
+                            <div className="w-2 h-2 bg-destructive rounded-full flex-shrink-0" />
+                          </div>
+                          <p className="text-xs text-muted-foreground line-clamp-2 mb-1">
+                            {notification.payload.note}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatRelativeTime(notification.payload.time)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Bell className="h-12 w-12 mx-auto mb-2 text-muted-foreground opacity-50" />
+                <p className="text-sm text-muted-foreground">
+                  אין התראות חדשות
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

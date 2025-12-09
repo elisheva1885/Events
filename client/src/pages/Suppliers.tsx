@@ -29,6 +29,7 @@ import { createSupplierRequest } from "../store/supplierRequestsSlice";
 import { Badge } from "../components/ui/badge";
 import { SendRequestDialog } from "../components/Request/SendRequestDialog";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/Utils/error";
 
 export default function Suppliers() {
   const dispatch: AppDispatch = useDispatch();
@@ -92,20 +93,27 @@ export default function Suppliers() {
   }) => {
     try {
       setIsSending(true);
-      setIsSending(false);
-      setSendRequest(false);
-      dispatch(clearSelectedSupplier());
-      await dispatch(
+      
+      console.log('🚀 Sending request with:', { eventId, requestMessage, supplierId });
+      
+      const result = await dispatch(
         createSupplierRequest({
           eventId,
           notesFromClient: requestMessage,
           supplierId: supplierId,
         })
       ).unwrap();
+      
+      console.log('✅ Request sent successfully:', result);
+      
       toast.success("הבקשה נשלחה בהצלחה");
-     } catch (err:string | unknown) {
-          const errorText = String(err);
-           toast.error(errorText);
+      dispatch(clearSelectedSupplier());
+      setSendRequest(false);
+     } catch (err:unknown) {
+       console.error("❌ Error sending request:", err);
+       toast.error(getErrorMessage(err,"שגיאה בשליחת הבקשה"));
+     } finally {
+       setIsSending(false);
      }
   };
 

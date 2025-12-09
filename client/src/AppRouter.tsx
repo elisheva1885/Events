@@ -12,6 +12,7 @@ import { PendingSuppliersPage } from "./pages/admin/PendingSuppliersPage";
 import { ActiveSuppliersPage } from "./pages/admin/ActiveSuppliersPage";
 import { SupplierDetailsPage } from "./pages/admin/SupplierDetailsPage";
 import { UsersPage } from "./pages/admin/UsersPage";
+import { EventsPage } from "./pages/admin/EventsPage";
 import { getUserRole } from "./services/auth";
 import type { AppRoute } from "./types/AppRouter";
 import SupplierDashboard from "./pages/Supplier/SupplierDashboard";
@@ -23,24 +24,16 @@ import ContractsPage from "./pages/ContractsPage";
 import { TermsOfService } from "./pages/TermsOfService";
 import { PrivacyPolicy } from "./pages/PrivacyPolicy";
 import NotificationsPage from "./pages/NotificationsPage";
-import DashboardUser from "./pages/DahboardUser";
+import DashboardUser from "./pages/DashboardUser";
 import ContractsPaymentsPage from "./pages/ContractsPaymentsPage";
 import BudgetManagementPage from "./pages/BudgetManagementPage";
 import { useDispatch } from "react-redux";
+import { AccessibilityMenu } from "./components/AccessibilityMenu";
 import { fetchUser } from "./store/authSlice";
 import type { AppDispatch } from "./store";
-import { useEffect } from "react";
 
 export default function AppRouter() {
   const dispatch: AppDispatch = useDispatch();
-
-  // מעדכן את פרטי המשתמש מהשרת אם יש token
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      dispatch(fetchUser());
-    }
-  }, [dispatch]);
 
   const userRoutes = [
     { title: "לוח בקרה", path: "/dashboard", element: < DashboardUser />, icon: LayoutDashboard },
@@ -88,15 +81,9 @@ export default function AppRouter() {
     else if (page === "register") navigate("/register");
   };
 
-  const handleLoginAndRegister = async () => {
-
-    
-    // טוען את פרטי המשתמש לפני ניווט
+  const handleLoginAndRegister = async () => {    
     await dispatch(fetchUser());
-    
-    // מקבל את ה-role מהשרת
-    const userRole =  getUserRole();
-    
+    const userRole = await getUserRole();
     if (userRole === 'admin') {
       navigate("/admin/dashboard");
     } else if (userRole === 'supplier') {      
@@ -107,6 +94,7 @@ export default function AppRouter() {
   };
 
   return (
+    <>
     <Routes>
       <Route path="/" element={<LandingPage onNavigate={handleNavigate} />} />
       <Route
@@ -164,7 +152,17 @@ export default function AppRouter() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/admin/events"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <EventsPage />
+          </ProtectedRoute>
+        }
+      />
 
     </Routes>
+    <AccessibilityMenu />
+    </>
   );
 }

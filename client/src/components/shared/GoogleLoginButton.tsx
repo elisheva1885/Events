@@ -1,6 +1,7 @@
 import { useGoogleLogin } from '@react-oauth/google';
 import { useState } from 'react';
 import { googleAuth } from '../../services/auth';
+import { getErrorMessage } from '@/Utils/error';
 
 interface GoogleLoginButtonProps {
   onSuccess: () => void;
@@ -23,16 +24,21 @@ export function GoogleLoginButton({ onSuccess, onError, mode = 'login' }: Google
         const userInfo = await userInfoResponse.json();
         
         // שליחת הפרטים לשרת שלנו
-        await googleAuth({
+        const response = await googleAuth({
           email: userInfo.email,
           name: userInfo.name,
           googleId: userInfo.sub,
           picture: userInfo.picture,
         });
         
+        // שמירת הטוקן ב-localStorage
+        if (response.token) {
+          localStorage.setItem('token', response.token);
+        }
+        
         onSuccess();
-      } catch (err: any) {
-        const errorMessage = err.response?.data?.message || 'שגיאה בהתחברות עם Google';
+      } catch (err) {
+        const errorMessage = getErrorMessage(err, 'שגיאה בהתחברות עם Google');
         onError(errorMessage);
       } finally {
         setLoading(false);

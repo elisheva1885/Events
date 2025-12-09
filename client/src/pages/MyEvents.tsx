@@ -4,8 +4,6 @@ import type { AppDispatch, RootState } from "../store";
 
 import {
   fetchEvents,
-  createEvent,
-  fetchEventTypes,
 } from "../store/eventsSlice";
 
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
@@ -13,20 +11,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { Eye, Plus } from "lucide-react";
 import { Button } from "../components/ui/button";
 
-import { formatEventDate, getEventStatusProgress } from "../Utils/DataUtils";
+import { formatEventDate } from "../Utils/DataUtils";
 
 import { EventFormDialog } from "../components/Event/EventFormDialog";
 import { EventDetailsDialog } from "../components/Event/EventsDetailsDialog";
 import { toast } from "sonner";
+import type { Event } from "@/types/Event";
 
 export default function MyEvents() {
   const dispatch: AppDispatch = useDispatch();
-  const { eventsList, loadingList, error, types: eventTypes } = useSelector(
-    (state: RootState) => state.events
-  );
+  const { eventsList, loadingList, error } = useSelector(
+    (state: RootState) => state.events);
 
   const [selectedTab, setSelectedTab] = useState("הכל");
-  const [viewingEvent, setViewingEvent] = useState<any>(null);
+  const [viewingEvent, setViewingEvent] = useState<Event | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
 
@@ -43,13 +41,13 @@ export default function MyEvents() {
   const filteredEvents = useMemo(() => {
     if (!eventsList) return [];
     if (selectedTab === "הכל") return eventsList;
-    return eventsList.filter((e) => e.status === selectedTab);
+    return eventsList.filter((e:Event) => e.status === selectedTab);
   }, [eventsList, selectedTab]);
 
-  const handleCreateEvent = async (data: any) => {
-    await dispatch(createEvent(data));
-    setIsCreateDialogOpen(false);
-  };
+  // const handleCreateEvent = async (data: Event) => {
+  //   await dispatch(createEvent(data));
+  //   setIsCreateDialogOpen(false);
+  // };
 
   useEffect(() => {
     if (error) {
@@ -72,14 +70,14 @@ export default function MyEvents() {
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
         <TabsList>
           <TabsTrigger value="הכל">הכל</TabsTrigger>
-          <TabsTrigger value="פעיל">פעיל</TabsTrigger>
+          <TabsTrigger value="מתוכנן">מתוכנן</TabsTrigger>
           <TabsTrigger value="הושלם">הושלם</TabsTrigger>
         </TabsList>
 
         <TabsContent value={selectedTab} className="mt-6">
           {filteredEvents.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredEvents.map((event) => (
+              {filteredEvents.map((event:Event) => (
                 <Card key={event._id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <CardTitle>{event.name}</CardTitle>
@@ -138,7 +136,7 @@ export default function MyEvents() {
       <EventFormDialog
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
-        onSubmit={handleCreateEvent}
+        // onSubmit={handleCreateEvent}
       />
 
       {/* פירוט אירוע */}
