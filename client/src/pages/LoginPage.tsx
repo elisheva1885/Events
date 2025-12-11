@@ -28,11 +28,10 @@ const handleSubmit = async (e: React.FormEvent) => {
       localStorage.setItem('token', response.token);
     }
     onLogin();
-  } catch (err: any) {
+  } catch (err) {
     setError(
-      err.response?.data?.message ||
-      err.message ||
-      'שגיאה בהתחברות. אנא נסה שוב.'
+      getErrorMessage(err,
+      'שגיאה בהתחברות. אנא נסה שוב.')
     );
   } finally {
     setLoading(false);

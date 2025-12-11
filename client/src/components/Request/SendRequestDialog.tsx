@@ -28,7 +28,7 @@ interface SendRequestDialogProps {
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: { eventId: string; requestMessage: string; supplierId: string }) => Promise<void>;
   isLoading: boolean;
-  isSending:boolean
+  isSending: boolean
 }
 
 export const SendRequestDialog = ({
@@ -50,7 +50,8 @@ export const SendRequestDialog = ({
   const supplierId = supplier._id;
 
   useEffect(() => {
-    dispatch(fetchRelevantEvents());    
+    dispatch(fetchRelevantEvents());
+    console.log('📥 Fetching relevant events for request dialog', eventsList);
   }, [dispatch]);
 
   // בחירת אירוע ראשון אוטומטית
@@ -70,15 +71,15 @@ export const SendRequestDialog = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     console.log('📤 Sending request:', { eventId, requestMessage, supplierId });
-    
+
     await onSubmit({
       eventId,
       requestMessage,
-      supplierId       
+      supplierId
     });
-    
+
     onOpenChange(false);
   };
 

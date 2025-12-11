@@ -29,6 +29,7 @@ import { createSupplierRequest } from "../store/supplierRequestsSlice";
 import { Badge } from "../components/ui/badge";
 import { SendRequestDialog } from "../components/Request/SendRequestDialog";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/Utils/error";
 
 export default function Suppliers() {
   const dispatch: AppDispatch = useDispatch();
@@ -62,7 +63,7 @@ export default function Suppliers() {
   useEffect(() => {
     const loadUrls = async () => {
       if (!suppliersList) return;
-   
+
       const updated = await Promise.all(
         suppliersList.map(async (s) => {
           if (s.profileImage?.key) {
@@ -92,9 +93,9 @@ export default function Suppliers() {
   }) => {
     try {
       setIsSending(true);
-      
+
       console.log('🚀 Sending request with:', { eventId, requestMessage, supplierId });
-      
+
       const result = await dispatch(
         createSupplierRequest({
           eventId,
@@ -103,17 +104,18 @@ export default function Suppliers() {
         })
       ).unwrap();
       
+
       console.log('✅ Request sent successfully:', result);
-      
+
       toast.success("הבקשה נשלחה בהצלחה");
       dispatch(clearSelectedSupplier());
       setSendRequest(false);
-     } catch (err:any) {
-       console.error("❌ Error sending request:", err);
-       toast.error(typeof err === 'string' ? err : err.message || "שגיאה בשליחת הבקשה");
-     } finally {
-       setIsSending(false);
-     }
+    } catch (err: unknown) {
+      console.error("❌ Error sending request:", err);
+      toast.error(getErrorMessage(err, "שגיאה בשליחת הבקשה"));
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
@@ -249,11 +251,17 @@ export default function Suppliers() {
           <SendRequestDialog
             supplier={selectedSupplier}
             open={sendRequest}
-            onOpenChange={(open) => !open && setSendRequest(false)}
+            onOpenChange={(open) => {
+              if (!open) {
+                setSendRequest(false);
+                dispatch(clearSelectedSupplier()); // ← חשוב מאוד
+              }
+            }}
             onSubmit={handleSendRequest}
             isLoading={false}
             isSending={isSending}
           />
+
         ) : (
           <SupplierDetailsDialog
             supplier={selectedSupplier}

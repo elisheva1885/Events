@@ -9,7 +9,6 @@ import { Badge } from "../components/ui/badge";
 import { Send, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback } from "../components/ui/avatar";
-import { formatMessageTime } from "../Utils/DataUtils";
 import type { Thread } from "../types/Thread";
 import { getSocket } from "../services/socket";
 import type { Message } from "@/types/Message";
@@ -24,7 +23,7 @@ export default function Chat() {
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
   const [messageText, setMessageText] = useState("");
   const [isMobileView, setIsMobileView] = useState(false);
-  const [debugLog, setDebugLog] = useState<string[]>([]);
+  // const [debugLog, setDebugLog] = useState<string[]>([]);
   const [socketInstance, setSocketInstance] = useState<ReturnType<typeof getSocket> | null>(null);
 
   // Initialize socket
@@ -151,11 +150,11 @@ export default function Chat() {
       });
       console.log("after sending");
 
-      setDebugLog((s) => [...s, `sent: ${messageText.trim()}`]);
+      // setDebugLog((s) => [...s, `sent: ${messageText.trim()}`]);
       setMessageText("");
     } catch {
       toast.error("שגיאה בשליחת ההודעה");
-      setDebugLog((s) => [...s, `send failed: ${messageText.trim()}`]);
+      // setDebugLog((s) => [...s, `send failed: ${messageText.trim()}`]);
     }
   };
 

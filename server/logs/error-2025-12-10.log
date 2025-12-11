@@ -1,0 +1,3 @@
+[2025-12-10T10:29:37.675Z] [ERROR] [29dd12ab-d723-4857-bbbd-d7c718c1a5f7] GET /api/suppliers?q=%D7%90 - text index required for $text query
+[2025-12-10T10:29:42.936Z] [ERROR] [0cd478e6-2f47-42bc-98d1-786bd6094d2d] GET /api/suppliers?q=%D7%90%D7%90 - text index required for $text query
+[2025-12-10T10:30:32.675Z] [ERROR] [a1a65899-6094-4835-b360-f055d239e6ec] GET /api/suppliers?q=%D7%90 - text index required for $text query

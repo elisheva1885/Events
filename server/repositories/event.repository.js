@@ -54,14 +54,18 @@ export async function findRelevantByOwnerId(ownerId, query = {}) {
   const { type, from, to } = query;
 
   const filter = { ownerId };
-  
-  // סינון לפי סוג אירוע
+
   if (type) {
     filter.type = type;
   }
 
-  // סינון לפי תאריכים אם צריך
-  if (from || to) {
+  // אם לא הגיעו from/to – ברירת מחדל: מהיום והלאה
+  if (!from && !to) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // תחילת היום
+
+    filter.date = { $gte: today };
+  } else if (from || to) {
     filter.date = {};
     if (from) filter.date.$gte = new Date(from);
     if (to) filter.date.$lte = new Date(to);
@@ -70,7 +74,7 @@ export async function findRelevantByOwnerId(ownerId, query = {}) {
   return Event.find(filter)
     .sort(DEFAULT_SORT)
     .select("_id name date type")
-    .lean()
+    .lean();
 }
 
 // 🔹 כל האירועים של משתמש (בלי פגינציה)

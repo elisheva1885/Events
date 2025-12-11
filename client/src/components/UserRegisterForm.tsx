@@ -107,9 +107,9 @@ export function UserRegisterForm({ onRegister, onRoleChange, currentRole }: Prop
     try {
       await register({ name, email, phone, password }, "user");
       onRegister();
-    } catch (err: any) {
+    } catch (err) {
       setErrors({
-        general: err?.response?.data?.message || "שגיאה בהרשמה",
+        general: getErrorMessage(err, "שגיאה בהרשמה"),
       });
     } finally {
       setLoading(false);

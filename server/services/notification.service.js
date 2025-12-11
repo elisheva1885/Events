@@ -1,11 +1,9 @@
 
-import { sendNotification } from '../sockets/notification.gateway.js';
 import { randomUUID } from 'crypto';
 import Redis from 'ioredis';
 import { notificationQueue } from '../queues/scheduler.js';
-const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
-  maxRetriesPerRequest: null
-})
+import { sendNotification } from '../sockets/notification.gateway.js';
+import redis from '../redis/redis.js';
  async function createNotificationUnsafe({ userId, type, payload, scheduledFor, channel = 'in-app' }) {
   const notification = {
     id: randomUUID(),
