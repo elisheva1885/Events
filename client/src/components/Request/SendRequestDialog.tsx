@@ -28,7 +28,7 @@ interface SendRequestDialogProps {
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: { eventId: string; requestMessage: string; supplierId: string }) => Promise<void>;
   isLoading: boolean;
-  isSending: boolean
+  isSending: boolean;
 }
 
 export const SendRequestDialog = ({
@@ -39,22 +39,20 @@ export const SendRequestDialog = ({
   isLoading,
   isSending,
 }: SendRequestDialogProps) => {
-
   const { eventsList, loadingList } = useSelector((state: RootState) => state.events);
   const dispatch: AppDispatch = useDispatch();
 
   const [eventId, setEventId] = useState("");
   const [requestMessage, setRequestMessage] = useState("");
 
-  // קובע supplierId מהקומפוננטה (אין צורך ב־state נוסף)
   const supplierId = supplier._id;
 
+  // טוען אירועים רלוונטיים
   useEffect(() => {
     dispatch(fetchRelevantEvents());
-    console.log('📥 Fetching relevant events for request dialog', eventsList);
   }, [dispatch]);
 
-  // בחירת אירוע ראשון אוטומטית
+  // בוחר את האירוע הראשון אוטומטית
   useEffect(() => {
     if (open && eventsList?.length > 0) {
       setEventId(eventsList[0]._id);
@@ -69,17 +67,19 @@ export const SendRequestDialog = ({
     }
   }, [open]);
 
+  // בדיקה אם האזור של הספק תואם את האירוע
+  const selectedEvent = eventsList.find(e => e._id === eventId);
+  const isRegionMismatch = selectedEvent && supplier.regions !== selectedEvent.locationRegion;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log('📤 Sending request:', { eventId, requestMessage, supplierId });
+    if (isRegionMismatch) {
+      // מונע שליחה אם האזור לא תואם
+      return;
+    }
 
-    await onSubmit({
-      eventId,
-      requestMessage,
-      supplierId
-    });
-
+    await onSubmit({ eventId, requestMessage, supplierId });
     onOpenChange(false);
   };
 
@@ -91,7 +91,6 @@ export const SendRequestDialog = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-
           {/* בחירת אירוע */}
           <div className="space-y-2">
             <Label>בחר אירוע</Label>
@@ -114,7 +113,7 @@ export const SendRequestDialog = ({
             <Label>הודעה לספק (לפחות 5 תווים)</Label>
             <Textarea
               value={requestMessage}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setRequestMessage(e.target.value)}
+              onChange={(e) => setRequestMessage(e.target.value)}
               placeholder="כתוב הודעה לספק (לפחות 5 תווים)..."
               rows={4}
               required
@@ -123,11 +122,22 @@ export const SendRequestDialog = ({
           </div>
 
           <DialogFooter>
-            <Button type="submit" disabled={isLoading || !eventId}>
-              {isSending ? "שולח..." : "שלח בקשה"}
+            <Button
+              type="submit"
+              disabled={isLoading || !eventId || isRegionMismatch}
+            >
+              {isRegionMismatch
+                ? "אזור הספק לא תואם לאירוע"
+                : isSending
+                ? "שולח..."
+                : "שלח בקשה"}
             </Button>
+            {isRegionMismatch && (
+              <p className="text-sm text-red-500 mt-1">
+                לא ניתן לשלוח בקשה – אזור הספק אינו תואם את אזור האירוע
+              </p>
+            )}
           </DialogFooter>
-
         </form>
       </DialogContent>
     </Dialog>

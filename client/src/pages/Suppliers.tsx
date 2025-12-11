@@ -110,12 +110,12 @@ export default function Suppliers() {
       toast.success("הבקשה נשלחה בהצלחה");
       dispatch(clearSelectedSupplier());
       setSendRequest(false);
-    } catch (err: unknown) {
-      console.error("❌ Error sending request:", err);
-      toast.error(getErrorMessage(err, "שגיאה בשליחת הבקשה"));
-    } finally {
-      setIsSending(false);
-    }
+     } catch (err:unknown) {
+       console.error("❌ Error sending request:", err);
+       toast.error(getErrorMessage(err,"שגיאה בשליחת הבקשה"));
+     } finally {
+       setIsSending(false);
+     }
   };
 
   return (
@@ -209,7 +209,7 @@ export default function Suppliers() {
                 {s.regions && (
                   <div className="flex items-center gap-2 text-sm">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
-                    <span>{s.regions.join(", ")}</span>
+                    <span>{s.regions}</span>
                   </div>
                 )}
 

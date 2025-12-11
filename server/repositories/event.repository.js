@@ -26,9 +26,7 @@ export async function updateBudgetAllocated(eventId, amount, session) {
       _id: eventId,
       $expr: {
         $and: [
-          // לא לרדת מתחת ל־0
           { $gte: [{ $add: ["$budgetAllocated", amount] }, 0] },
-          // לא לעבור את התקציב
           { $lte: [{ $add: ["$budgetAllocated", amount] }, "$budget"] },
         ],
       },
@@ -49,23 +47,14 @@ export async function updateBudget(eventId, ownerId, newBudget, historyRecord) {
   ).select(EVENT_PROJECTION);
 }
 
-// 🔹 רק אירועים רלוונטיים (כל האירועים של המשתמש)
 export async function findRelevantByOwnerId(ownerId, query = {}) {
   const { type, from, to } = query;
 
   const filter = { ownerId };
-
   if (type) {
     filter.type = type;
   }
-
-  // אם לא הגיעו from/to – ברירת מחדל: מהיום והלאה
-  if (!from && !to) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // תחילת היום
-
-    filter.date = { $gte: today };
-  } else if (from || to) {
+  if (from || to) {
     filter.date = {};
     if (from) filter.date.$gte = new Date(from);
     if (to) filter.date.$lte = new Date(to);
@@ -77,38 +66,21 @@ export async function findRelevantByOwnerId(ownerId, query = {}) {
     .lean();
 }
 
-// 🔹 כל האירועים של משתמש (בלי פגינציה)
 export async function findAllByOwnerId(ownerId, query = {}) {
   const filter = buildFilter(ownerId, query);
   return await Event.find(filter)
     .sort(DEFAULT_SORT)
     .select(EVENT_PROJECTION);
 }
-// export async function findRelevantByOwnerId(ownerId, query = {}) {
-//   const { type } = query;
 
-//   // בונים פילטר בסיסי
-//   const filter = buildFilter(ownerId, { type });
-
-//   // מחזירים רק אירועים פעילים
-//   filter.status = "פעיל";
-
-//   return Event.find(filter)
-//     .sort(DEFAULT_SORT)
-//     .select("_id name date"); // רק השדות שרצית
-// }
-
-
-
-// 🔹 אירועים רלוונטיים (פעילים בלבד)
 export async function findUpcomingEventsByOwnerId(ownerId) {
   const now = new Date();
 
   return await Event.find({
     ownerId,
-    date: { $gte: now } // רק אירועים מהיום והלאה
+    date: { $gte: now } 
   })
-    .sort({ date: 1 })        // מיון לפי תאריך עולה
+    .sort({ date: 1 })        
     .select(EVENT_PROJECTION);
 }
 

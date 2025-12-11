@@ -8,3 +8,9 @@
 [2025-12-11T09:04:09.673Z] [ERROR] [5b5bad3b-dbb8-40c7-970f-80946950087f] POST /api/events/6919886059c019b85c224540/requests - כבר קיימת בקשה ממתינה לספק זה עבור האירוע
 [2025-12-11T09:17:57.928Z] [ERROR] [532664a9-a996-422b-8309-00f0d794de2b] POST /api/events/693946952c3cbe0111038351/requests - כבר קיימת בקשה ממתינה לספק זה עבור האירוע
 [2025-12-11T09:18:45.359Z] [ERROR] [19e4bef6-64d4-4bba-9ff7-6f5d0543138e] POST /api/events/6919886059c019b85c224540/requests - כבר קיימת בקשה ממתינה לספק זה עבור האירוע
+[2025-12-11T09:27:21.083Z] [ERROR] [2f7775c0-134e-4bc7-bfce-cbdb28a96bd8] POST /api/events/691982f159c019b85c2244e0/requests - לא ניתן ליצור חוזה לאירוע שכבר עבר
+[2025-12-11T10:20:35.154Z] [ERROR] [3ecbcda1-9240-4ea4-bab5-1f2ec2c14d31] POST /api/events/691982f159c019b85c2244e0/requests - לא ניתן ליצור חוזה לאירוע שכבר עבר
+[2025-12-11T10:30:39.326Z] [ERROR] [a2e9eec7-ad1e-4252-b5a2-32c1131a7b10] GET /api/notifications - Connection is closed.
+[2025-12-11T10:30:39.433Z] [ERROR] [7fe65827-05f0-49e3-bcb9-d82dd0612713] GET /api/notifications - Connection is closed.
+[2025-12-11T12:07:34.392Z] [ERROR] [b24590a0-1cbb-46d1-8cf0-58db3ed5d0e5] GET /api/suppliers - skip is not defined
+[2025-12-11T12:07:34.495Z] [ERROR] [5e4c4d54-d46a-4dc6-83cb-cd94f705b446] GET /api/suppliers - skip is not defined
