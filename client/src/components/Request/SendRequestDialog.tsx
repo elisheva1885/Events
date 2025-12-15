@@ -39,10 +39,13 @@ export const SendRequestDialog = ({
   isLoading,
   isSending,
 }: SendRequestDialogProps) => {
-  const { eventsList, loadingList } = useSelector((state: RootState) => state.events);
+  const { eventsList, loadingList, error } = useSelector(
+      (state: RootState) => state.events);
+  console.log("events", eventsList);
+  
   const dispatch: AppDispatch = useDispatch();
 
-  const [eventId, setEventId] = useState("");
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [requestMessage, setRequestMessage] = useState("");
 
   const supplierId = supplier._id;
@@ -55,31 +58,25 @@ export const SendRequestDialog = ({
   // בוחר את האירוע הראשון אוטומטית
   useEffect(() => {
     if (open && eventsList?.length > 0) {
-      setEventId(eventsList[0]._id);
+      setSelectedEvent(eventsList[0]);
     }
   }, [open, eventsList]);
 
   // ניקוי השדות כשסוגרים
   useEffect(() => {
     if (!open) {
-      setEventId("");
+      setSelectedEvent(null);
       setRequestMessage("");
     }
   }, [open]);
 
-  // בדיקה אם האזור של הספק תואם את האירוע
-  const selectedEvent = eventsList.find(e => e._id === eventId);
   const isRegionMismatch = selectedEvent && supplier.regions !== selectedEvent.locationRegion;
-
+  console.log("aaa", supplier.regions, selectedEvent?.locationRegion);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedEvent || isRegionMismatch) return;
 
-    if (isRegionMismatch) {
-      // מונע שליחה אם האזור לא תואם
-      return;
-    }
-
-    await onSubmit({ eventId, requestMessage, supplierId });
+    await onSubmit({ eventId: selectedEvent._id, requestMessage, supplierId });
     onOpenChange(false);
   };
 
@@ -94,7 +91,14 @@ export const SendRequestDialog = ({
           {/* בחירת אירוע */}
           <div className="space-y-2">
             <Label>בחר אירוע</Label>
-            <Select value={eventId} onValueChange={setEventId} required>
+            <Select
+              value={selectedEvent?._id || ""}
+              onValueChange={(id) => {
+                const ev = eventsList.find((e) => e._id === id) || null;
+                setSelectedEvent(ev);
+              }}
+              required
+            >
               <SelectTrigger>
                 <SelectValue placeholder={loadingList ? "טוען..." : "בחר אירוע"} />
               </SelectTrigger>
@@ -122,15 +126,12 @@ export const SendRequestDialog = ({
           </div>
 
           <DialogFooter>
-            <Button
-              type="submit"
-              disabled={isLoading || !eventId || isRegionMismatch}
-            >
+            <Button type="submit" disabled={isLoading || !selectedEvent || isRegionMismatch}>
               {isRegionMismatch
                 ? "אזור הספק לא תואם לאירוע"
                 : isSending
-                ? "שולח..."
-                : "שלח בקשה"}
+                  ? "שולח..."
+                  : "שלח בקשה"}
             </Button>
             {isRegionMismatch && (
               <p className="text-sm text-red-500 mt-1">

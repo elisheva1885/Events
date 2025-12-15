@@ -16,65 +16,46 @@ export const RequestService = {
       eventId,
       searchTerm
     });
-  }
-  ,
+  },
 
   async getRequestsBySupplierUserId(userId, { page, limit, status, eventId, searchTerm }) {
     const supplierId = await SupplierRepository.getSupplierIdByUserId(userId);
     if (!supplierId) throw new Error("ספק לא נמצא");
     return await RequestRepository.getBySupplier(supplierId, { page, limit, status, eventId, searchTerm });
-
   },
 
-  // יוצרת את הבקשה ב-DB
-  async createSupplierRequest({ eventId, supplierId, clientId, notesFromClient, basicEventSummary, expiresAt }) {
-    const request = await RequestRepository.createRequest({
-      eventId,
-      supplierId,
-      clientId,
-      notesFromClient,
-      basicEventSummary,
-      expiresAt,
-    });
-    console.log("Created request:", request._id);
-    return request;
-  },
-
-// יוצרת או מקבלת Thread עבור הבקשה
-async handleThread(requestId, clientId, supplierId) {
+  // יוצרת thread ומקשרת לבקשה
+  async handleThread(requestId, clientId, supplierId) {
     const thread = await getOrCreateThread({ requestId, userId: clientId, supplierId });
     await RequestRepository.updateRequestTheardId(requestId, thread._id);
-    console.log("Associated thread:", thread._id);
     return thread;
   },
 
-// שולחת התראה לספק (עטוף ב-try/catch)
-async  sendNotificationToSupplier(supplierUserId, request, event, client) {
-  try {
-    await NotificationService.createNotification({
-      userId: supplierUserId,
-      type: "בקשה",
-      payload: {
-        requestId: request._id,
-        eventId: event._id,
-        eventName: event.name,
-        clientId: client._id,
-        clientName: client.name,
-        time: new Date().toISOString(),
-        note: 'בקשה חדשה נוצרה',
-      },
-      channel: "in-app",
-    });
-    console.log("Notification sent to supplier user");
-  } catch (err) {
-    console.error("Failed to send notification:", err);
-    // אם רוצים, אפשר גם לשמור את השגיאה ב־DB או לשלוח retry אחר
-  }
-}
+  // שולחת התראה לספק
+  async sendNotificationToSupplier(supplierUserId, request, event, client) {
+    try {
+      await NotificationService.createNotification({
+        userId: supplierUserId,
+        type: "בקשה",
+        payload: {
+          requestId: request._id,
+          eventId: event._id,
+          eventName: event.name,
+          clientId: client._id,
+          clientName: client.name,
+          time: new Date().toISOString(),
+          note: 'בקשה חדשה נוצרה',
+        },
+        channel: "in-app",
+      });
+      console.log("Notification sent to supplier user");
+    } catch (err) {
+      console.error("Failed to send notification:", err);
+    }
+  },
 
-,
-// פונקציה ראשית שמרכזת את כל הלוגיקה
-async createSupplierRequest({ eventId, supplierId, clientId, notesFromClient }) {
+  // פונקציה ראשית ליצירת בקשה
+  async createSupplierRequest({ eventId, supplierId, clientId, notesFromClient }) {
     const now = new Date();
 
     const [event, supplier, client] = await Promise.all([
@@ -102,11 +83,20 @@ async createSupplierRequest({ eventId, supplierId, clientId, notesFromClient }) 
     const eventDate = event.date ? new Date(event.date) : now;
     const expiresAt = new Date(eventDate.getTime() + 24 * 60 * 60 * 1000);
 
-    const request = await createRequestEntry({ eventId, supplierId, clientId, notesFromClient, basicEventSummary, expiresAt });
-    const thread = await handleThread(request._id, clientId, supplierId);
+    const request = await RequestRepository.createRequest({
+      eventId,
+      supplierId,
+      clientId,
+      notesFromClient,
+      basicEventSummary,
+      expiresAt
+    });
+
+    // כאן משתמשים ב־this כדי לגשת ל־handleThread
+    const thread = await this.handleThread(request._id, clientId, supplierId);
 
     if (supplier.user) {
-      await sendNotificationToSupplier(supplier.user, request, event, client);
+      await this.sendNotificationToSupplier(supplier.user, request, event, client);
     }
 
     return { request, threadId: thread._id };
@@ -137,7 +127,6 @@ async createSupplierRequest({ eventId, supplierId, clientId, notesFromClient }) 
   async declineSupplierRequest(id, supplierId) {
     const now = new Date();
     const request = await RequestRepository.getRequestById(id);
-    console.log(request);
 
     ensurePendingSupplierRequest(request, supplierId);
     const result = await RequestRepository.updateStatus(id, "נדחה");
@@ -158,9 +147,7 @@ async createSupplierRequest({ eventId, supplierId, clientId, notesFromClient }) 
   },
 };
 
-
-
-//------validations----
+// ------ Validations ------
 function ensurePendingSupplierRequest(request, supplierId) {
   const now = new Date();
 
