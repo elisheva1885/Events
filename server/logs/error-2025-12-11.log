@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [2025-12-11T07:53:05.308Z] [ERROR] [f0119df8-9fc7-4c2c-833d-63db80c96670] POST /api/events/692fe8054180b79e06c1ad0f/requests - לא ניתן ליצור חוזה לאירוע שכבר עבר
 [2025-12-11T07:53:37.240Z] [ERROR] [3c894c00-63a5-445d-9d0a-3ebb0f2d9821] POST /api/events/69355ff5d0eb69de2f5f509b/requests - כבר קיימת בקשה ממתינה לספק זה עבור האירוע
 [2025-12-11T07:53:58.309Z] [ERROR] [efd065b3-4405-40bb-855e-54914c1227e5] POST /api/events/691987a559c019b85c224528/requests - כבר קיימת בקשה ממתינה לספק זה עבור האירוע
@@ -14,3 +15,7 @@
 [2025-12-11T10:30:39.433Z] [ERROR] [7fe65827-05f0-49e3-bcb9-d82dd0612713] GET /api/notifications - Connection is closed.
 [2025-12-11T12:07:34.392Z] [ERROR] [b24590a0-1cbb-46d1-8cf0-58db3ed5d0e5] GET /api/suppliers - skip is not defined
 [2025-12-11T12:07:34.495Z] [ERROR] [5e4c4d54-d46a-4dc6-83cb-cd94f705b446] GET /api/suppliers - skip is not defined
+=======
+[2025-12-11T10:56:31.036Z] [ERROR] [d38f923b-9a09-44ff-822a-d6c149e35df7] POST /api/contracts/693aa0f0b9b1881577d484b2/sign - אין מספיק תקציב זמין עבור החוזה. עדכני תקציב לפני החתימה.
+[2025-12-11T10:56:53.565Z] [ERROR] [a62bc152-132e-4450-b41d-a8e6bc32d799] PATCH /api/budget/events/6936e806de5d9e819f1af033 - next is not defined
+>>>>>>> 78740fa1f4eb1f90eaaddc2432d354185194918c
