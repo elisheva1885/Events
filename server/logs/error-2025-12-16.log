@@ -19,3 +19,4 @@
 [2025-12-16T10:32:19.281Z] [ERROR] [0765fb9a-a7bd-45a1-a3c1-28c8a271d277] POST /api/suppliers/register - Supplier validation failed: regions: Cast to string failed for value "[ 'גוש דן' ]" (type Array) at path "regions"
 [2025-12-16T10:32:23.903Z] [ERROR] [658593f2-0911-435a-b87c-89bdf82adbd0] POST /api/suppliers/register - Supplier validation failed: regions: Cast to string failed for value "[ 'גוש דן' ]" (type Array) at path "regions"
 [2025-12-16T10:45:41.841Z] [ERROR] [ff9a93dd-8db2-411c-bf8c-8a9ae545c0c1] POST /api/suppliers/register - Supplier validation failed: regions: Cast to string failed for value "[ 'גוש דן' ]" (type Array) at path "regions"
+[2025-12-16T11:37:57.467Z] [ERROR] [2926f43a-bc3e-49cc-ab14-24d8a1f2a294] POST /api/auth/login - ערכים לא תקינים

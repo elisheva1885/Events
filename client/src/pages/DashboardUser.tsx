@@ -83,7 +83,7 @@ function StatCard({
   actionLabel,
 }: StatCardProps) {
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card className="hover:shadow-lg transition-shadow w-full overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
           <span>{title}</span>
@@ -91,7 +91,7 @@ function StatCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
-        <div className="text-3xl font-bold">{value}</div>
+        <div className="text-2xl sm:text-3xl font-bold break-words">{value}</div>
         {subtitle && (
           <p className="text-sm text-muted-foreground">{subtitle}</p>
         )}
@@ -153,14 +153,14 @@ export default function Dashboard() {
   )}`;
 
   return (
-    <div className="space-y-6" style={{ direction: "rtl" }}>
+    <div className="w-full max-w-full space-y-6 overflow-x-hidden" style={{ direction: "rtl" }}>
       {/* כותרת */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">שלום, {user?.name || "משתמש"}</h1>
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <h1 className="text-2xl sm:text-3xl font-bold break-words max-w-full">שלום, {user?.name || "משתמש"}</h1>
       </div>
 
       {/* 🔝 שורה עליונה – 3 כרטיסי KPI */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
         {/* האירוע הקרוב */}
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -220,7 +220,7 @@ export default function Dashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
         <StatCard
           title="חוזים פעילים"
           value={activeContractsCount}
@@ -262,17 +262,18 @@ export default function Dashboard() {
         </Card>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
+        <Card className="w-full overflow-hidden">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-primary" />
               תשלומים לפי חודש
             </CardTitle>
           </CardHeader>
-          <CardContent className="h-72">
+          <CardContent className="h-72 w-full overflow-hidden">
             {paymentsByMonth && paymentsByMonth.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
+              <div className="w-full h-full">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <BarChart data={paymentsByMonth}>
                   <CartesianGrid
                     strokeDasharray="3 3"
@@ -293,6 +294,7 @@ export default function Dashboard() {
                   />
                 </BarChart>
               </ResponsiveContainer>
+              </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-8">
                 אין עדיין נתוני תשלומים להצגה.
@@ -302,16 +304,17 @@ export default function Dashboard() {
         </Card>
 
         {/* תשלומים לפי סטטוס */}
-        <Card>
+        <Card className="w-full overflow-hidden">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-primary" />
               תשלומים לפי סטטוס
             </CardTitle>
           </CardHeader>
-          <CardContent className="h-72">
+          <CardContent className="h-72 w-full overflow-hidden">
             {paymentsByStatus && paymentsByStatus.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
+              <div className="w-full h-full">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <PieChart>
                   <Pie
                     data={paymentsByStatus}
@@ -331,6 +334,7 @@ export default function Dashboard() {
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
+              </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-8">
                 אין מספיק נתוני תשלומים לסטטיסטיקה.
@@ -341,9 +345,9 @@ export default function Dashboard() {
       </div>
 
       {/* ציר זמן + התראות */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
         {/* ציר זמן אירועים */}
-        <Card>
+        <Card className="w-full">
           <CardHeader>
             <CardTitle>ציר זמן אירועים</CardTitle>
           </CardHeader>
