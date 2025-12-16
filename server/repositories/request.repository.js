@@ -21,11 +21,14 @@ export const RequestRepository = {
 
   async getRequestsByUserId(
     userId,
-    { page = 1, limit = 10, status, eventId, searchTerm } = {}
+    { page = 1, limit = 5, status, eventId, searchTerm } = {}
   ) {
     const baseFilter = { clientId: userId };
 
-    if (status && status !== "הכל") {
+    // If status is a virtual (e.g., "פג" for expired), filter in JS after fetching all
+    const isVirtualStatus = status === "פג";
+
+    if (!isVirtualStatus && status && status !== "הכל") {
       baseFilter.status = status;
     }
 
@@ -44,8 +47,9 @@ export const RequestRepository = {
     const limitNumber = Number(limit) || 10;
     const skip = (pageNumber - 1) * limitNumber;
 
-    const [items, total] = await Promise.all([
-      SupplierRequest.find(query)
+    if (isVirtualStatus) {
+      // Fetch all, filter by virtual status (expired)
+      let all = await SupplierRequest.find(query)
         .populate("eventId")
         .populate({
           path: "supplierId",
@@ -54,19 +58,43 @@ export const RequestRepository = {
             select: "name email",
           },
         })
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limitNumber),
-      SupplierRequest.countDocuments(query),
-    ]);
-
-    return {
-      items,
-      total,
-      page: pageNumber,
-      pageSize: limitNumber,
-      totalPages: Math.ceil(total / limitNumber) || 1,
-    };
+        .sort({ createdAt: -1 });
+      // Virtual: expired = expiresAt < now
+      const now = new Date();
+      all = all.filter(r => r.expiresAt && r.expiresAt < now);
+      const total = all.length;
+      const items = all.slice(skip, skip + limitNumber);
+      return {
+        items,
+        total,
+        page: pageNumber,
+        pageSize: limitNumber,
+        totalPages: Math.ceil(total / limitNumber) || 1,
+      };
+    } else {
+      const [items, total] = await Promise.all([
+        SupplierRequest.find(query)
+          .populate("eventId")
+          .populate({
+            path: "supplierId",
+            populate: {
+              path: "user",
+              select: "name email",
+            },
+          })
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(limitNumber),
+        SupplierRequest.countDocuments(query),
+      ]);
+      return {
+        items,
+        total,
+        page: pageNumber,
+        pageSize: limitNumber,
+        totalPages: Math.ceil(total / limitNumber) || 1,
+      };
+    }
   },
   async createRequest({
     eventId,
@@ -103,7 +131,7 @@ export const RequestRepository = {
 
    async getBySupplier(
     supplierId,
-    { page = 1, limit = 10, status, eventId, searchTerm } = {}
+  { page = 1, limit = 5, status, eventId, searchTerm } = {}
   ) {
     const baseFilter = { supplierId };
 
