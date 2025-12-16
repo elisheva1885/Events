@@ -30,6 +30,7 @@ import { createSupplierRequest } from "../store/supplierRequestsSlice";
 import { Badge } from "../components/ui/badge";
 import { SendRequestDialog } from "../components/Request/SendRequestDialog";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/Utils/error";
 
 export default function Suppliers() {
   const dispatch: AppDispatch = useDispatch();
@@ -37,7 +38,7 @@ export default function Suppliers() {
   const regions = useSelector((state: RootState) => state.regions?.list || []);
   const [selectedCategory, setSelectedCategory] = useState("הכל");
   const [page, setPage] = useState<number>(1);
-  const [limit] = useState<number>(9);
+  const [limit] = useState<number>(9); // Set to 9 per page (change this number as needed)
   const [regionFilter, setRegionFilter] = useState("all");
   // Fetch regions on mount
   useEffect(() => {
