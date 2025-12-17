@@ -120,7 +120,7 @@ export default function AppLayout({ navigationItems, children }: { navigationIte
           <SidebarHeader className="bg-background dark:bg-gray-900">
             <div className="flex flex-col items-center justify-start p-0 m-0">
               <img
-                src="/src/assets/logo.png"
+                src="/logo.png"
                 alt="Évenu לוגו"
                 className="h-28 w-auto mb-2 mt-2"
                 style={{ maxWidth: '90%', display: 'block' }}
