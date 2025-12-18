@@ -21,7 +21,7 @@ import {
 } from "../../store/contractsSlice";
 import { SignContractDialog } from "./SignContractDialog";
 import { ContractCard } from "./ContractCard";
-import { fetchEvents } from "../../store/eventsSlice";
+import { fetchRelevantEvents } from "../../store/eventsSlice";
 import {
   Select,
   SelectTrigger,
@@ -82,11 +82,14 @@ const [debouncedSearch, setDebouncedSearch] = useState("");
     );
   };
 
+  // Add filtering logic for relevant events
   useEffect(() => {
     if (type === "client") {
-      dispatch(fetchEvents({ page: 1, pageSize: 10 })); // Pass required arguments
+      dispatch(fetchRelevantEvents()); // Fetch only relevant events
     }
   }, [type, dispatch]);
+
+  const filteredEvents = events.filter((event) => event.isRelevant);
 
   useEffect(() => {
     const statusFilter = selectedTab === "הכל" ? undefined : selectedTab;
@@ -288,7 +291,7 @@ const [debouncedSearch, setDebouncedSearch] = useState("");
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">כל האירועים</SelectItem>
-                    {events?.map((ev) => (
+                    {filteredEvents?.map((ev) => (
                       <SelectItem key={ev._id} value={ev._id}>
                         {ev.name}
                       </SelectItem>
