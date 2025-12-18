@@ -6,7 +6,6 @@ const DEFAULT_SORT = { date: 1 };
 
 function buildFilter(ownerId, { status, type } = {}) {
   const filter = { ownerId };
-  // Only filter by DB status if status is a real DB value (not a virtual)
   if (status && status !== "מתוכנן" && status !== "הושלם" && status !== "בפעולה") {
     filter.status = status;
   }
@@ -72,7 +71,6 @@ export async function findRelevantByOwnerId(ownerId, query = {}) {
 
   let events = await Event.find(filter)
     .sort(DEFAULT_SORT)
-    .select("_id name date type locationRegion estimatedGuests budget status")
     .lean({ virtuals: true }); 
 
   if (status && (status === "מתוכנן" || status === "הושלם" || status === "בפעולה")) {
