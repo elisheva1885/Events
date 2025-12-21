@@ -29,8 +29,6 @@ export const fetchNotifications = createAsyncThunk<
 >("notifications/fetch", async (_, { rejectWithValue }) => {
   try {
     const res = await api.get("/notifications");
-    console.log('not',res);
-    
     return res.data; // יכול להיות מערך או אובייקט
   } catch (err: unknown) {
     return rejectWithValue(

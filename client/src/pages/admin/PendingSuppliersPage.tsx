@@ -27,7 +27,7 @@ export function PendingSuppliersPage() {
       const data = await getPendingSuppliers();
       setSuppliers(data);
     } catch (error) {
-      console.error('Error fetching pending suppliers:', error);
+      // error fetching pending suppliers
       setError('שגיאה בטעינת רשימת הספקים הממתינים');
     } finally {
       setHasLoaded(true);
@@ -39,7 +39,7 @@ export function PendingSuppliersPage() {
       await approveSupplier(id);
       setSuppliers(prev => prev.filter(s => s._id !== id));
     } catch (error) {
-      console.error('Error approving supplier:', error);
+      // error approving supplier
       setError('שגיאה באישור ספק');
     }
   };
@@ -49,7 +49,7 @@ export function PendingSuppliersPage() {
       await rejectSupplier(id);
       setSuppliers(prev => prev.filter(s => s._id !== id));
     } catch (error) {
-      console.error('Error rejecting supplier:', error);
+      // error rejecting supplier
       setError('שגיאה בדחיית ספק');
     }
   };

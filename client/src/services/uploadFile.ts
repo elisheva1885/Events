@@ -25,7 +25,7 @@ import axios from "axios";
 
     return key; 
   } catch (error: unknown) {
-    console.error("S3 Upload Error:", error);
+    // S3 upload error: (removed debug log)
     throw new Error(getErrorMessage(error, "שגיאה בהעלאת הקובץ"));
   }
 };

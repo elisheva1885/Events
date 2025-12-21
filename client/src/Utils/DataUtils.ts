@@ -13,8 +13,7 @@ export const formatEventDate = (dateString?: string) => {
 };
 
 export const formatRequestDate = (dateString?: string) => {
-  console.log('date',dateString);
-  
+  // format request date
   if (!dateString) return "לא צוין";
   try {
     const date = new Date(dateString);

@@ -32,7 +32,7 @@ export function UsersPage() {
       const response = await api.get('/admin/users');
       setUsers(response.data.data);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error("Error fetching users:", error);
       setError('שגיאה בטעינת משתמשים');
     } finally {
       setHasLoaded(true);

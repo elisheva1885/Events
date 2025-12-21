@@ -97,10 +97,9 @@ export default function Suppliers() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('/api/categories'); // Adjust the endpoint as needed
+        const response = await fetch('/api/categories'); 
         const data = await response.json();
 
-        // Ensure the data is an array of objects with _id and label
         if (Array.isArray(data) && data.every(item => '_id' in item && 'label' in item)) {
           setCategories(data);
         } else {
@@ -135,9 +134,7 @@ export default function Suppliers() {
     try {
       setIsSending(true);
 
-      console.log('🚀 Sending request with:', { eventId, requestMessage, supplierId });
-
-      const result = await dispatch(
+       await dispatch(
         createSupplierRequest({
           eventId,
           notesFromClient: requestMessage,
@@ -145,8 +142,6 @@ export default function Suppliers() {
         })
       ).unwrap();
 
-
-      console.log('✅ Request sent successfully:', result);
 
       toast.success("הבקשה נשלחה בהצלחה");
       dispatch(clearSelectedSupplier());
@@ -355,7 +350,7 @@ export default function Suppliers() {
             onOpenChange={(open) => {
               if (!open) {
                 setSendRequest(false);
-                dispatch(clearSelectedSupplier()); // ← חשוב מאוד
+                dispatch(clearSelectedSupplier()); 
               }
             }}
             onSubmit={handleSendRequest}
@@ -371,7 +366,7 @@ export default function Suppliers() {
             onOpenChange={(open) => {
               if (!open) {
                 setViewingSupplier(false);
-                dispatch(clearSelectedSupplier()); // Clear selected supplier when dialog closes
+                dispatch(clearSelectedSupplier()); 
               }
             }}
             onSendRequest={() => {

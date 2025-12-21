@@ -25,8 +25,6 @@ export const fetchBudgetEvents = createAsyncThunk<
 >("budget/fetchEvents", async (_, { rejectWithValue }) => {
   try {
     const { data } = await api.get("/budget/events");
-    console.log(data);
-    
     return data.events;
   } catch (err: unknown) {
     return rejectWithValue(getErrorMessage(err, "שגיאה בטעינת נתוני התקציב"));

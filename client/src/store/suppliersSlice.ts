@@ -54,11 +54,8 @@ export const fetchSupplierById = createAsyncThunk<
   { rejectValue: string }
 >("suppliers/fetchById", async (id, { rejectWithValue }) => {
   try {
-    const { data } = await api.get<{ supplier: Supplier }>(
-      `/suppliers/${id}`
-    );
-    console.log("supp",data);
-    
+    const { data } = await api.get<{ supplier: Supplier }>(`/suppliers/${id}`);
+    // supplier fetched
     return data.supplier;
   } catch (err: unknown) {
     return rejectWithValue(

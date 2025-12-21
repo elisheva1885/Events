@@ -72,11 +72,9 @@ export const fetchDashboardChartsUser = createAsyncThunk<
 >("dashboard/fetchChartsUser", async (_, { rejectWithValue }) => {
   try {
     const res = await api.get("/dashboard/user/charts");
-    console.log('res',res);
-    
     return res.data as DashboardChartsUserResponse;
   } catch (err: unknown) {
-    console.error(err);
+    // error fetching dashboard charts for user
     return rejectWithValue(
       getErrorMessage(err, "שגיאה בטעינת גרפים לדשבורד המשתמש")
     );
@@ -90,10 +88,9 @@ export const fetchDashboardSummaryUser = createAsyncThunk<
   try{
   const res = await api.get("/dashboard/summaryUser");  
   return res.data;
-  }catch(err:unknown){
-    console.error(err);
-       return rejectWithValue(getErrorMessage(err,'שגיאה בטעינת פרטי המשתמש'));
-
+  } catch (err: unknown) {
+    // error fetching dashboard summary for user
+    return rejectWithValue(getErrorMessage(err, 'שגיאה בטעינת פרטי המשתמש'));
   }
 });
 export const fetchDashboardSummarySupplier = createAsyncThunk<
@@ -103,9 +100,8 @@ export const fetchDashboardSummarySupplier = createAsyncThunk<
   const res = await api.get("/dashboard/summarySupplier");
 
   return res.data;
-  }
-  catch(err:unknown){
-    console.error(err);
+  } catch (err: unknown) {
+    // error fetching dashboard summary for supplier
     return rejectWithValue(getErrorMessage(err,'שגיאה בטעינת פרטי הספק'));
   }
 });

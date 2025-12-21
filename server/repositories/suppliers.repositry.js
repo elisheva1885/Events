@@ -143,12 +143,10 @@ export const SupplierRepository = {
     const update = { profileImage, media };
     if (typeof baseBudget !== 'undefined') update.baseBudget = baseBudget;
     
-    // Handle priceFiles - if array provided, use it; if single file, push to existing array
     if (priceFiles !== undefined) {
       if (Array.isArray(priceFiles)) {
         update.priceFiles = priceFiles;
       } else if (priceFiles) {
-        // Single file: fetch current and push new one
         const supplier = await Supplier.findById(id).select('priceFiles');
         if (supplier && supplier.priceFiles) {
           supplier.priceFiles.push(priceFiles);

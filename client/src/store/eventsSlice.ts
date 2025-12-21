@@ -107,10 +107,9 @@ export const createEvent = createAsyncThunk<
       "/events",
       event
     );
-    console.log("data", data);
     return data.data;
   } catch (err: unknown) {
-    console.log("err", err);
+    // error creating event
     return rejectWithValue(getErrorMessage(err, "שגיאה ביצירת אירוע"));
   }
 });
@@ -237,7 +236,6 @@ const eventsSlice = createSlice({
 
       // ---- עדכון אירוע ----
       .addCase(updateEvent.fulfilled, (state, action: PayloadAction<Event>) => {
-        console.log("UPDATE FULFILLED PAYLOAD:", action.payload);
         const idx = state.eventsList.findIndex(
           (e) => e._id === action.payload._id
         );
