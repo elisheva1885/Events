@@ -22,12 +22,10 @@ export async function openChatThread (eventId, supplierId, clientId) {
         threadId,
         from: { id: clientId, type: 'user' },
         to: { id: supplierId, type: 'supplier' },
-        body: 'שלום וברכה! ממתין לתגובתך לפנייתי' // "Request approved" (Hebrew)
+        body: 'שלום וברכה! ממתין לתגובתך לפנייתי' 
       });
-      console.log("the message ", msg);
       
     } catch (err) {
-      // don't block the approval on messaging failures; log or rethrow if desired
       console.error('Failed to create initial thread message:', err);
     }
     return threadId;

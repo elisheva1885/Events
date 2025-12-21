@@ -140,11 +140,8 @@ export async function blockSupplier(supplierId) {
     throw new AppError(400, 'ספק כבר חסום');
   }
 
-  // חסימת הספק
   const updatedSupplier = await repo.blockSupplier(supplierId);
   
-  // TODO: שליחת התראה למייל/SMS לספק
-  console.log(`🚫 Supplier blocked: ${updatedSupplier.user?.email}`);
 
   return {
     message: 'ספק נחסם בהצלחה',

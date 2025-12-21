@@ -18,9 +18,7 @@ import { updateBudgetAllocated } from "./event.service.js";
 
 function validateCreatePaymentData(data) {
   const { amount, dueDate, note } = data || {};
-  console.log(data,amount, dueDate, note, isNaN(amount));
   
-  // סכום
   if (amount == null || isNaN(amount)) {
     throw new AppError(400, "יש להזין סכום לתשלום");
   }
@@ -28,7 +26,6 @@ function validateCreatePaymentData(data) {
     throw new AppError(400, "סכום התשלום חייב להיות גדול מ-0");
   }
 
-  // dueDate
   if (!dueDate) {
     throw new AppError(400, "יש להזין תאריך לתשלום");
   }
@@ -37,13 +34,11 @@ function validateCreatePaymentData(data) {
     throw new AppError(400, "תאריך התשלום אינו תקין");
   }
 
-  // (אופציונלי) לא לאפשר תשלום שמתוכנן עמוק בעבר
   const now = new Date();
   const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   if (due < yesterday) {
     throw new AppError(400, "לא ניתן ליצור תשלום עם תאריך שעבר מזמן");
   }
-  // הערה ארוכה מדי (אופציונלי)
   if (note && note.length > 1000) {
     throw new AppError(400, "הערת התשלום ארוכה מדי");
   }
@@ -104,14 +99,7 @@ export async function createContract(data, userId) {
   const totalAllocated = event.budgetAllocated ?? 0;
   const budget = event.budget ?? 0;
   const afterThisContract = totalAllocated + totalAmount;
-  // console.log(
-  //   "mount",
-  //   paymentPlan,
-  //   totalAmount,
-  //   totalAllocated,
-  //   budget,
-  //   afterThisContract
-  // );
+
 
   if (budget && afterThisContract > budget) {
     await NotificationService.createNotification({

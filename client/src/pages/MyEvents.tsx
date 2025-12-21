@@ -33,10 +33,7 @@ export default function MyEvents() {
     dispatch(fetchEvents({ page, pageSize }));
   }, [dispatch, page, pageSize]);
 
-  // const handleCreateEvent = async (data: Event) => {
-  //   await dispatch(createEvent(data));
-  //   setIsCreateDialogOpen(false);
-  // };
+
 
   useEffect(() => {
     if (error) {

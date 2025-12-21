@@ -32,7 +32,6 @@ if (eventDate < new Date()) {
   if (ownerId !== userId.toString()) {
     throw new AppError(403, "אין לך הרשאה להשתמש בתקציב של אירוע זה");
   }
-  console.log("sign", eventId, amount, session);
 
   const updatedEvent = await repo.updateBudgetAllocated(
     eventId,
@@ -67,7 +66,6 @@ export async function createEvent(ownerId, data) {
 }
 export async function getUserRelevantEvents(ownerId, query) {
   const events = await repo.findRelevantByOwnerId(ownerId, query);
-  console.log('📋 Relevant events for user:', events.length, 'events');
   return { events };
 }
 export async function getEventById(id, ownerId) {
@@ -79,7 +77,6 @@ export async function getEventById(id, ownerId) {
 
   const eventOwnerId =
     event.ownerId?._id?.toString?.() ?? event.ownerId?.toString?.();
-  console.log(eventOwnerId, ownerId);
 
   if (eventOwnerId !== ownerId.toString()) {
     throw new AppError(403, "אין לך הרשאה לצפות באירוע הזה");

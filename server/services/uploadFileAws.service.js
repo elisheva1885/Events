@@ -34,11 +34,7 @@ export const uploadFileAwsService = {
 
   // יצירת כתובת הורדה
   createPresignedDownloadUrl: async (fileKey) => {
-    console.log("AWS ACCESS:", process.env.AWS_ACCESS_KEY);
-    console.log("AWS SECRET:", process.env.AWS_SECRET_KEY);
-    console.log("AWS REGION:", process.env.AWS_REGION);
-    console.log("AWS BUCKET:", process.env.AWS_BUCKET);
-
+   
     const params = {
       Bucket: BUCKET,
       Key: fileKey,

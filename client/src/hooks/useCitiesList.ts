@@ -7,7 +7,6 @@ export function useCitiesList() {
   useEffect(() => {
     async function fetchCities() {
       try {
-        // שימוש בـ axios מוגדר כדי להשתמש בـ API URL הנכון בכל סביבה
         const { data } = await api.get("/cities");
 
         if (data.success && data.cities) {

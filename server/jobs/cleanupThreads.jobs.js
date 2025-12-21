@@ -5,7 +5,6 @@ import connection from '../queues/scheduler.js';
 export function startCleanupJob() {
 
   cron.schedule('0 3 * * *', async () => {
-    console.log('cleanup job started');
 
     const now = new Date();
 
@@ -21,7 +20,6 @@ export function startCleanupJob() {
       await t.deleteOne();
     }
 
-    console.log('cleanup job completed');
   });
 
 }

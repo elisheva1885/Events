@@ -41,30 +41,23 @@ export const SupplierService = {
   },
 
   async registerSupplier({ userData, supplierData }) {
-    console.log("🔍 התחלת רישום ספק עם נתונים:", { email: userData.email, category: supplierData.category });
     
-    // ===== כל הבדיקות לפני יצירת משתמש! =====
     
     // 1. בדיקת אימייל קיים
     const existingUser = await models.User.findOne({ email: userData.email });
-    console.log("✅ בדיקת אימייל קיים:", existingUser ? "נמצא משתמש!" : "אימייל פנוי");
     if (existingUser) throw new AppError(409, 'משתמש כבר קיים');
     
     // 2. בדיקת קטגוריה
     const category = await categorySrv.getCategoryById(supplierData.category);
-    console.log("✅ בדיקת קטגוריה:", category ? "קטגוריה תקינה" : "קטגוריה לא נמצאה");
     if(!category) throw new AppError(404, "קטגוריה לא קיימת");
     
     // 3. בדיקת regions
-    console.log("✅ בדיקת אזורים:", supplierData.regions);
     if (!supplierData.regions || !Array.isArray(supplierData.regions) || supplierData.regions.length === 0) {
       throw new AppError(400, "חובה לבחור לפחות אזור שירות אחד");
     }
 
     // Ensure regions are valid and exist in the predefined list (trim whitespace)
     const trimmedRegions = supplierData.regions.map(r => (typeof r === 'string' ? r.trim() : String(r).trim()));
-    console.log("🔍 אזורים לאחר trim:", trimmedRegions);
-    console.log("📋 אזורים ידועים:", israelRegions);
     
     supplierData.regions = trimmedRegions.filter(region => {
       const isValid = israelRegions.includes(region);
@@ -93,7 +86,6 @@ export const SupplierService = {
       
       return { user, supplier, token };
     } catch (error) {
-      // אם נכשל ליצור ספק אבל המשתמש כבר נוצר - מוחקים אותו
       if (user && user._id) {
         await models.User.findByIdAndDelete(user._id);
       }
