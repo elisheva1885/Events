@@ -17,6 +17,7 @@ export const initSocket = (userId: string) => {
       console.log("🟢 Connected with id:", socketInstance?.id);
       socketInstance?.emit("register", userId);
     });
+
     socketInstance.on("disconnect", () =>
       console.log("🔴 Disconnected")
     );

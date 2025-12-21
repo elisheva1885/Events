@@ -151,12 +151,7 @@ export default function SupplierDashboard() {
   }, [dispatch]);
 
   useEffect(() => {
-    console.log("📊 [ספק] נתוני גרפים:", { 
-      revenueByMonth, 
-      paymentsByStatus,
-      hasRevenueData: revenueByMonth?.length > 0,
-      hasStatusData: paymentsByStatus?.length > 0 
-    });
+    // supplier dashboard charts updated
   }, [revenueByMonth, paymentsByStatus]);
 
   const upcomingFirst = upcomingEvent?.[0] || null;

@@ -27,7 +27,7 @@ export function ActiveSuppliersPage() {
       const data = await getActiveSuppliers();
       setSuppliers(data);
     } catch (error) {
-      console.error('Error fetching active suppliers:', error);
+      // error fetching active suppliers
       setError('שגיאה בטעינת רשימת הספקים הפעילים');
     } finally {
       setHasLoaded(true);
@@ -47,7 +47,7 @@ export function ActiveSuppliersPage() {
 
       await fetchSuppliers();
     } catch (error) {
-      console.error('Error blocking/unblocking supplier:', error);
+      // error blocking/unblocking supplier
       setError('שגיאה בשינוי סטטוס ספק');
     }
   };

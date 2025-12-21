@@ -77,7 +77,7 @@ export const fetchDashboardSummarySupplier = createAsyncThunk<
     const res = await api.get("/dashboard/summarySupplier");
     return res.data as SupplierDashboardSummaryResponse;
   } catch (err: unknown) {
-    console.error(err);
+    // error loading supplier dashboard summary
     return rejectWithValue(getErrorMessage(err, "שגיאה בטעינת פרטי הספק"));
   }
 });
@@ -90,7 +90,7 @@ export const fetchDashboardChartsSupplier = createAsyncThunk<
     const res = await api.get("/dashboard/supplier/charts");
     return res.data as SupplierDashboardChartsResponse;
   } catch (err: unknown) {
-    console.error(err);
+    // error loading supplier dashboard charts
     return rejectWithValue(
       getErrorMessage(err, "שגיאה בטעינת גרפים לדשבורד הספק")
     );

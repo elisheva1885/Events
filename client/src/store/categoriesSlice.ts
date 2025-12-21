@@ -8,8 +8,6 @@ export const fetchCategories = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get("/categories"); 
-      console.log("Categories response:", response.data);
-      
       return response.data;
     }  catch (err: unknown) {
         return rejectWithValue(getErrorMessage(err,'שגיאה בטעינת קטגוריות'));

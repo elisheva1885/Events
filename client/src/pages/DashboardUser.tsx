@@ -147,12 +147,7 @@ export default function Dashboard() {
   }, [dispatch]);
 
   useEffect(() => {
-    console.log("📊 נתוני גרפים:", { 
-      paymentsByMonth, 
-      paymentsByStatus,
-      hasMonthData: paymentsByMonth?.length > 0,
-      hasStatusData: paymentsByStatus?.length > 0 
-    });
+    // dashboard charts updated
   }, [paymentsByMonth, paymentsByStatus]);
 
   const upcomingFirst: Event | null = upcomingEvent?.[0] || null;

@@ -83,9 +83,11 @@ export default function RequestList({ type }: RequestListProps) {
   }, [searchTerm]);
 
   useEffect(() => {
+    if (type === "user") {
     dispatch(fetchRelevantEvents());
     dispatch(fetchCategories());
-  }, [dispatch]);
+    }
+  }, [dispatch, type]);
 
   const handleTabChange = (value: string) => {
     setSelectedTab(value);
