@@ -13,7 +13,7 @@ export const DashboardRepository = {
     const contracts = await Contract.find({ supplierId }).select("_id").lean();
     return contracts.map((c) => c._id);
   },
-  async findUpcomingEventsForUser(ownerId, daysAhead = 60) {
+  async findUpcomingEventsForUser(ownerId, daysAhead = 60*12) {
     const now = new Date();
     const limit = new Date();
     limit.setDate(limit.getDate() + daysAhead);
