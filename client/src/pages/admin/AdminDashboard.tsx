@@ -88,12 +88,7 @@ export function AdminDashboard() {
         setRecentSuppliers(additionalStats.recentSuppliers || []);
         setRecentEvents(additionalStats.recentEvents || []);
         
-        console.log("📊 [אדמין] נתוני גרפים:", { 
-          monthlyEvents: additionalStats.monthlyEvents, 
-          categorySuppliers: additionalStats.categorySuppliers,
-          hasMonthlyData: additionalStats.monthlyEvents?.length > 0,
-          hasCategoryData: additionalStats.categorySuppliers?.length > 0 
-        });
+       
       } catch (err) {
         console.error('Error fetching dashboard stats:', err);
         setError('שגיאה בטעינת סטטיסטיקות הדשבורד');

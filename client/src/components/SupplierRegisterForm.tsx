@@ -159,8 +159,6 @@ export function SupplierRegisterForm({ onRegister, onRoleChange, currentRole }: 
     setLoading(true);
 
     try {
-      // הכנה של הנתונים לפי מבנה שהשרת מצפה לו
-      // המרת regions ממחרוזת למערך (מפריד לפי פסיק)
       const regionsArray = regions ? regions.split(',').map(r => r.trim()).filter(r => r) : [];
 
       await register(

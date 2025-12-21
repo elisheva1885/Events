@@ -9,7 +9,6 @@ interface ToastProps {
 export function showToast({ type, title, message }: ToastProps) {
   const id = "custom-toast";
 
-  // מחיקה אם כבר קיים
   const existing = document.getElementById(id);
   if (existing) existing.remove();
 

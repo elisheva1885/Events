@@ -49,7 +49,6 @@ export const RequestService = {
         },
         channel: "in-app",
       });
-      console.log("Notification sent to supplier user");
     } catch (err) {
       console.error("Failed to send notification:", err);
     }

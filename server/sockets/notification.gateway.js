@@ -12,16 +12,6 @@ export function registerNotificationHandlers(io, socket) {
     if (!userId) return;
 
     socket.join(userId.toString());
-    console.log(`📦 User ${userId} joined room`);
-
-    // שולף התראות קיימות ושולח ללקוח
-    // try {
-    //   const notifications = await NotificationService.getUserNotifications(userId);
-    //   notifications.forEach(n => socket.emit("notification", n));
-    // } catch (err) {
-    //   console.error("Error fetching notifications:", err);
-    //   socket.emit("error", { message: "Could not fetch notifications" });
-    // }
   });
 }
 

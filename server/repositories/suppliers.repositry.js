@@ -83,7 +83,6 @@ export const SupplierRepository = {
     }
 
     const skip = (Number(page) - 1) * Number(limit);
-    console.log('SupplierRepository.findMany filter:', filter, 'limit:', limit, 'page:', page);
 
     const [items, total] = await Promise.all([
       Supplier.find(filter)

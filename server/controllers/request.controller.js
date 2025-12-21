@@ -76,7 +76,6 @@ export const RequestController = {
     }
 
     const { id } = req.params;
-    console.log(id);
 
     const result = await RequestService.approveSupplierRequest(
       id,

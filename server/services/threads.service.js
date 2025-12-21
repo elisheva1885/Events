@@ -76,7 +76,6 @@ export async function serviceGetThreadsForUser(userId) {
  * Get threads for a supplier (by supplierUserId)
  */
 export async function serviceGetThreadsForSupplier(supplierUserId) {
-  console.log("Service: Getting threads for supplier user:", supplierUserId);
   const threads = await repo.getThreadsForSupplier(supplierUserId);
   return enrichThreads(threads, supplierUserId);
 }

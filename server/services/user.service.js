@@ -14,7 +14,6 @@ export async function getUserProfile(userId) {
   }
 
   const { password, _id, ...userWithoutIdAndPassword } = user.toObject();
-  console.log('Fetched user profile for userId:', userWithoutIdAndPassword);
   return userWithoutIdAndPassword;
 
 }

@@ -18,7 +18,6 @@ export async function getThreadByRequestId(requestId) {
  * Get a thread by _id
  */
 export async function getThreadById(threadId) {
-  console.log("Repository: Fetching thread with ID:", threadId);
   return Thread.findById(threadId);
 }
 
@@ -52,6 +51,5 @@ export async function getThreadsForUser(userId) {
  * Get all threads for a supplier (by supplierUserId)
  */
 export async function getThreadsForSupplier(supplierUserId) {
-  console.log("Repository: Getting threads for supplier user:", supplierUserId);
   return getThreadsByFilter({ supplierUserId });
 }

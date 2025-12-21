@@ -2,12 +2,9 @@ import cron from 'node-cron';
 import Event from '../models/event.model.js';
 
 cron.schedule('43 8 * * *', async () => {
-  // רץ כל יום ב-03:00 לפנות בוקר
   
   try {
     const now = new Date();
-    console.log("CRON Job started at: ", now.toISOString());
-    // גבולות יום נוכחי
     const start = new Date();
     start.setHours(0, 0, 0, 0);
 
@@ -32,7 +29,6 @@ cron.schedule('43 8 * * *', async () => {
       { status: 'פעיל' }
     );
 
-    console.log('Event statuses updated automatically');
   } catch (error) {
     console.error('CRON Error updating events:', error);
   }

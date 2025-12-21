@@ -50,7 +50,6 @@ import {
   fetchDashboardSummaryUser,
 } from "@/store/dashboardSlice";
 
-// ----- צבע לפי סטטוס לתרשים העוגה ----- //
 function getStatusColor(status: string): string {
   switch (status) {
     case "שולם":
@@ -64,7 +63,6 @@ function getStatusColor(status: string): string {
   }
 }
 
-// ----- כרטיס סטטיסטיקה כללי ----- //
 interface StatCardProps {
   title: string;
   value: string | number;
