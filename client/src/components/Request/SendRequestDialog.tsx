@@ -69,7 +69,10 @@ export const SendRequestDialog = ({
   const supplierRegionsArray = Array.isArray(supplier.regions) ? supplier.regions.map(r => (r || "").trim()) : [];
   const hasCountryWideRegion = supplierRegionsArray.includes("כל הארץ");
   const eventRegionTrimmed = (selectedEvent?.locationRegion || "").trim();
-  const hasRegionMatch = supplierRegionsArray.some(region => region === eventRegionTrimmed);
+  
+  // If event has no region set, allow any supplier (region is not a blocker)
+  // Otherwise, check if supplier covers this region
+  const hasRegionMatch = !eventRegionTrimmed || supplierRegionsArray.some(region => region === eventRegionTrimmed);
   
   const isRegionMismatch = selectedEvent && 
     !hasCountryWideRegion && 
